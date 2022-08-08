@@ -16,8 +16,6 @@ import org.springframework.web.reactive.function.server.bodyToMono
 import org.springframework.web.reactive.function.server.router
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.onErrorResume
-import java.util.stream.Collectors
-import java.util.stream.Stream
 import javax.validation.ConstraintViolationException
 import javax.validation.Validator
 
@@ -65,7 +63,7 @@ class DemoRouter(private val validator: Validator, private val service: DemoServ
                     .flatMap { ServerResponse.ok().bodyValue(DemoResponse(it)) }
                     .onErrorResume(PredictableException::class) {
                         ServerResponse.ok()
-                            .bodyValue(DemoErrorResponse(PredictableException.STATUS, it.message!!))
+                            .bodyValue(DemoErrorResponse(PredictableException.HTTP_STATUS, it.message!!))
                     }
                     .onErrorResume {
                         ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)

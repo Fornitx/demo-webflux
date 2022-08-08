@@ -47,7 +47,7 @@ class GlobalErrorWebExceptionHandler(
             val errorAttributes = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL))
 
             val status = if (error is PredictableException) HttpStatus.OK.value() else getHttpStatus(errorAttributes)
-            val code = if (error is PredictableException) PredictableException.STATUS else status
+            val code = if (error is PredictableException) PredictableException.HTTP_STATUS else status
 
             // TODO logging response body
             val response = DemoErrorResponse(code, error.message!!)

@@ -5,7 +5,7 @@ import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
 import com.example.demowebflux.error.PredictableException
 import com.example.demowebflux.filters.TraceIdFilter.Companion.TRACE_ID_HEADER
-import mu.*
+import mu.KLoggable
 import org.apache.commons.lang3.RandomStringUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
@@ -17,7 +17,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.WebTestClient
 import reactor.core.publisher.Mono
-import java.util.*
 
 @TestInstance(PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
@@ -26,7 +25,7 @@ abstract class BaseDemoTest(
     protected val MSG: String,
 ) : KLoggable {
     companion object {
-        protected fun randomString(): String = RandomStringUtils.random(12)
+        protected fun randomString(): String = RandomStringUtils.randomAlphanumeric(12)
     }
 
     override val logger = logger()
@@ -42,7 +41,7 @@ abstract class BaseDemoTest(
     @Order(1)
     @Test
     open fun testHappyWay() {
-        val traceId = UUID.randomUUID().toString()
+        val traceId = randomString()
 
         client.post()
             .uri(PATH)
@@ -94,14 +93,14 @@ abstract class BaseDemoTest(
             .consumeWith {
                 val response = it.responseBody!!
                 logger.error { response }
-                assertThat(response.status.code == status.value())
+                assertThat(response.status.code).isEqualTo(status.value())
             }
     }
 
     @Order(4)
     @Test
     fun testBadContentType() {
-        val traceId = UUID.randomUUID().toString()
+        val traceId = randomString()
         val status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
 
         client.post()
@@ -118,14 +117,14 @@ abstract class BaseDemoTest(
             .consumeWith {
                 val response = it.responseBody!!
                 logger.error { response }
-                assertThat(response.status.code == status.value())
+                assertThat(response.status.code).isEqualTo(status.value())
             }
     }
 
     @Order(5)
     @Test
     fun testBadAcceptType() {
-        val traceId = UUID.randomUUID().toString()
+        val traceId = randomString()
         val status = HttpStatus.NOT_ACCEPTABLE
 
         client.post()
@@ -142,14 +141,14 @@ abstract class BaseDemoTest(
             .consumeWith {
                 val response = it.responseBody!!
                 logger.error { response }
-                assertThat(response.status.code == status.value())
+                assertThat(response.status.code).isEqualTo(status.value())
             }
     }
 
     @Order(6)
     @Test
     fun testValidation() {
-        val traceId = UUID.randomUUID().toString()
+        val traceId = randomString()
         val status = HttpStatus.BAD_REQUEST
 
         client.post()
@@ -166,14 +165,14 @@ abstract class BaseDemoTest(
             .consumeWith {
                 val response = it.responseBody!!
                 logger.error { response }
-                assertThat(response.status.code == status.value())
+                assertThat(response.status.code).isEqualTo(status.value())
             }
     }
 
     @Order(7)
     @Test
     fun testInternalError() {
-        val traceId = UUID.randomUUID().toString()
+        val traceId = randomString()
         val status = HttpStatus.INTERNAL_SERVER_ERROR
 
         whenever(service.foo(MSG)).thenReturn(Mono.error(RuntimeException("Unexpected error!")))
@@ -193,14 +192,14 @@ abstract class BaseDemoTest(
             .consumeWith {
                 val response = it.responseBody!!
                 logger.info { response }
-                assertThat(response.status.code == status.value())
+                assertThat(response.status.code).isEqualTo(status.value())
             }
     }
 
     @Order(8)
     @Test
     open fun testPredictableError() {
-        val traceId = UUID.randomUUID().toString()
+        val traceId = randomString()
 
         whenever(service.foo(MSG)).thenReturn(Mono.error(PredictableException("It's OK!")))
         whenever(service.bar(MSG)).thenReturn(Mono.error(PredictableException("It's OK!")))
@@ -219,7 +218,7 @@ abstract class BaseDemoTest(
             .consumeWith {
                 val response = it.responseBody!!
                 logger.info { response }
-                assertThat(response.status.code == PredictableException.STATUS)
+                assertThat(response.status.code).isEqualTo(PredictableException.HTTP_STATUS)
             }
     }
 }

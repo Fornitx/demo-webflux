@@ -1,7 +1,5 @@
 package com.example.demowebflux.error
 
-import java.lang.RuntimeException
-
 @Suppress("unused")
 class PredictableException : RuntimeException {
     constructor(message: String?) : super(message)
@@ -9,6 +7,6 @@ class PredictableException : RuntimeException {
     constructor(cause: Throwable?) : super(cause)
 
     companion object {
-        const val STATUS = 1500
+        const val HTTP_STATUS = 1500
     }
 }
