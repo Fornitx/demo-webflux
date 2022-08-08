@@ -5,6 +5,8 @@ import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
 import com.example.demowebflux.error.PredictableException
 import com.example.demowebflux.filters.TraceIdFilter.Companion.TRACE_ID_HEADER
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import mu.KLoggable
 import org.apache.commons.lang3.RandomStringUtils
 import org.assertj.core.api.Assertions.assertThat
@@ -33,6 +35,9 @@ abstract class BaseDemoTest(
     @Autowired
     private lateinit var client: WebTestClient
 
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
+
     @SpyBean
     private lateinit var service: DemoService
 
@@ -40,9 +45,11 @@ abstract class BaseDemoTest(
 
     @Order(1)
     @Test
-    open fun testHappyWay() {
+    fun testHappyWay() {
         val traceId = randomString()
         val request = DemoRequest(MSG, _anyField = mapOf("A" to mapOf("B" to "C")))
+
+        assertThat(objectMapper.writeValueAsString(request)).doesNotContain(DemoRequest::_anyField.name)
 
         client.post()
             .uri(PATH)
@@ -53,10 +60,13 @@ abstract class BaseDemoTest(
             .isOk
             .expectHeader()
             .valueEquals(TRACE_ID_HEADER, traceId)
-            .expectBody(DemoResponse::class.java)
+            .expectBody(String::class.java)
             .consumeWith {
-                val response = it.responseBody!!
-                logger.info { response }
+                val body = it.responseBody!!
+                logger.info { body }
+                assertThat(body).doesNotContain(DemoResponse::_anyField.name)
+
+                val response = objectMapper.readValue<DemoResponse>(body)
                 assertThat(response.msg).isEqualTo(happyWayMsg)
                 assertThat(response._anyField).isEqualTo(request._anyField)
             }
@@ -198,7 +208,7 @@ abstract class BaseDemoTest(
 
     @Order(8)
     @Test
-    open fun testPredictableError() {
+    fun testPredictableError() {
         val traceId = randomString()
 
         whenever(service.foo(MSG)).thenReturn(Mono.error(PredictableException("It's OK!")))
