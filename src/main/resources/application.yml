@@ -1,0 +1,10 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+
+logging:
+  level:
+    com.example: TRACE
+  pattern:
+    dateformat: HH:mm:ss.SSS
