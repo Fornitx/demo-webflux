@@ -3,6 +3,7 @@ package com.example.demowebflux
 import com.example.demowebflux.data.DemoErrorResponse
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
+import com.example.demowebflux.error.ErrorCodes
 import com.example.demowebflux.error.PredictableException
 import com.example.demowebflux.filters.TraceIdFilter.Companion.TRACE_ID_HEADER
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -92,21 +93,20 @@ abstract class BaseDemoTest(
     @Order(3)
     @Test
     fun testNoHeader() {
-        val status = HttpStatus.BAD_REQUEST
 
         client.post()
             .uri(PATH)
             .bodyValue(DemoRequest(randomString()))
             .exchange()
             .expectStatus()
-            .isEqualTo(status)
+            .isBadRequest
             .expectHeader()
             .doesNotExist(TRACE_ID_HEADER)
             .expectBody(DemoErrorResponse::class.java)
             .consumeWith {
                 val response = it.responseBody!!
                 logger.error { response }
-                assertThat(response.status.code).isEqualTo(status.value())
+                assertThat(response.status.code).isEqualTo(ErrorCodes.COMMON_ERROR.code)
             }
     }
 
@@ -114,7 +114,6 @@ abstract class BaseDemoTest(
     @Test
     fun testBadContentType() {
         val traceId = randomString()
-        val status = HttpStatus.UNSUPPORTED_MEDIA_TYPE
 
         client.post()
             .uri(PATH)
@@ -122,14 +121,14 @@ abstract class BaseDemoTest(
             .bodyValue(MSG)
             .exchange()
             .expectStatus()
-            .isEqualTo(status)
+            .isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
             .expectHeader()
             .valueEquals(TRACE_ID_HEADER, traceId)
             .expectBody(DemoErrorResponse::class.java)
             .consumeWith {
                 val response = it.responseBody!!
                 logger.error { response }
-                assertThat(response.status.code).isEqualTo(status.value())
+                assertThat(response.status.code).isEqualTo(ErrorCodes.COMMON_ERROR.code)
             }
     }
 
@@ -137,7 +136,6 @@ abstract class BaseDemoTest(
     @Test
     fun testBadAcceptType() {
         val traceId = randomString()
-        val status = HttpStatus.NOT_ACCEPTABLE
 
         client.post()
             .uri(PATH)
@@ -146,14 +144,14 @@ abstract class BaseDemoTest(
             .bodyValue(DemoRequest(MSG))
             .exchange()
             .expectStatus()
-            .isEqualTo(status)
+            .isEqualTo(HttpStatus.NOT_ACCEPTABLE)
             .expectHeader()
             .valueEquals(TRACE_ID_HEADER, traceId)
             .expectBody(DemoErrorResponse::class.java)
             .consumeWith {
                 val response = it.responseBody!!
                 logger.error { response }
-                assertThat(response.status.code).isEqualTo(status.value())
+                assertThat(response.status.code).isEqualTo(ErrorCodes.COMMON_ERROR.code)
             }
     }
 
@@ -161,7 +159,6 @@ abstract class BaseDemoTest(
     @Test
     fun testValidation() {
         val traceId = randomString()
-        val status = HttpStatus.BAD_REQUEST
 
         client.post()
             .uri(PATH)
@@ -169,14 +166,14 @@ abstract class BaseDemoTest(
             .bodyValue(DemoRequest(MSG.substring(0..1)))
             .exchange()
             .expectStatus()
-            .isEqualTo(status)
+            .isBadRequest
             .expectHeader()
             .valueEquals(TRACE_ID_HEADER, traceId)
             .expectBody(DemoErrorResponse::class.java)
             .consumeWith {
                 val response = it.responseBody!!
                 logger.error { response }
-                assertThat(response.status.code).isEqualTo(status.value())
+                assertThat(response.status.code).isEqualTo(ErrorCodes.COMMON_ERROR.code)
             }
     }
 
@@ -184,7 +181,6 @@ abstract class BaseDemoTest(
     @Test
     fun testInternalError() {
         val traceId = randomString()
-        val status = HttpStatus.INTERNAL_SERVER_ERROR
 
         whenever(service.foo(MSG)).thenReturn(Mono.error(RuntimeException("Unexpected error!")))
         whenever(service.bar(MSG)).thenReturn(Mono.error(RuntimeException("Unexpected error!")))
@@ -195,14 +191,14 @@ abstract class BaseDemoTest(
             .bodyValue(DemoRequest(MSG))
             .exchange()
             .expectStatus()
-            .isEqualTo(status)
+            .isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
             .expectHeader()
             .valueEquals(TRACE_ID_HEADER, traceId)
             .expectBody(DemoErrorResponse::class.java)
             .consumeWith {
                 val response = it.responseBody!!
                 logger.info { response }
-                assertThat(response.status.code).isEqualTo(status.value())
+                assertThat(response.status.code).isEqualTo(ErrorCodes.COMMON_ERROR.code)
             }
     }
 
@@ -220,14 +216,14 @@ abstract class BaseDemoTest(
             .bodyValue(DemoRequest(MSG))
             .exchange()
             .expectStatus()
-            .isEqualTo(HttpStatus.OK)
+            .isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
             .expectHeader()
             .valueEquals(TRACE_ID_HEADER, traceId)
             .expectBody(DemoErrorResponse::class.java)
             .consumeWith {
                 val response = it.responseBody!!
                 logger.info { response }
-                assertThat(response.status.code).isEqualTo(PredictableException.HTTP_STATUS)
+                assertThat(response.status.code).isEqualTo(ErrorCodes.PREDICTABLE_ERROR.code)
             }
     }
 }

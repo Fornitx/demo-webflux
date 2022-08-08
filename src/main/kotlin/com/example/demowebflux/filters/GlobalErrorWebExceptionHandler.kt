@@ -2,6 +2,7 @@ package com.example.demowebflux.filters
 
 import com.example.demowebflux.DemoController
 import com.example.demowebflux.data.DemoErrorResponse
+import com.example.demowebflux.error.ErrorCodes
 import com.example.demowebflux.error.PredictableException
 import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
@@ -11,7 +12,6 @@ import org.springframework.boot.autoconfigure.web.reactive.error.DefaultErrorWeb
 import org.springframework.boot.web.reactive.error.ErrorAttributes
 import org.springframework.context.ApplicationContext
 import org.springframework.core.annotation.Order
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerCodecConfigurer
 import org.springframework.stereotype.Component
@@ -46,22 +46,23 @@ class GlobalErrorWebExceptionHandler(
             val error = getError(request)
             val errorAttributes = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL))
 
-            val status = if (error is PredictableException) HttpStatus.OK.value() else getHttpStatus(errorAttributes)
-            val code = if (error is PredictableException) PredictableException.HTTP_STATUS else status
+            val httpStatus = getHttpStatus(errorAttributes)
+            val errorCode = if (error is PredictableException) error.errorCode else ErrorCodes.COMMON_ERROR
+            val message = errorAttributes["message"] as String? ?: error.message
 
             // TODO logging response body
-            val response = DemoErrorResponse(code, error.message!!)
+            val response = DemoErrorResponse(errorCode, message)
             if (log.isDebugEnabled) {
                 log.debug(
                     "Response [{}] {}\n{}",
                     request.exchange().request.id,
-                    status,
+                    httpStatus,
                     objectMapper.writeValueAsString(response)
                 )
             } else {
-                log.info("Response [{}] {}", request.exchange().request.id, status)
+                log.info("Response [{}] {}", request.exchange().request.id, httpStatus)
             }
-            return ServerResponse.status(status)
+            return ServerResponse.status(httpStatus)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(response)
         }

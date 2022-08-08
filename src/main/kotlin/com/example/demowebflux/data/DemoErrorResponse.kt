@@ -1,7 +1,9 @@
 package com.example.demowebflux.data
 
-data class DemoErrorResponse(val status: Status) {
-    constructor(code: Int, message: String) : this(Status(code, message))
+import com.example.demowebflux.error.ErrorCodes
 
-    data class Status(val code: Int, val message: String)
+data class DemoErrorResponse(val status: Status) {
+    constructor(code: ErrorCodes, message: String?) : this(Status(code.code, message))
+
+    data class Status(val code: Int, val message: String?)
 }
