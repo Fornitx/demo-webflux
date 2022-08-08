@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerCodecConfigurer
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Mono
@@ -62,7 +61,6 @@ class GlobalErrorWebExceptionHandler(
             } else {
                 log.info("Response [{}] {}", request.exchange().request.id, status)
             }
-            val serverHttpResponse = request.exchange().response
             return ServerResponse.status(status)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(response)
