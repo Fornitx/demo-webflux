@@ -52,6 +52,8 @@ class DemoRouter(private val validator: Validator, private val service: DemoServ
         }
         return serverRequest.bodyToMono<DemoRequest>()
             .flatMap { request ->
+                log.info { "/foo $traceId $request" }
+
                 // validation
                 val violations = validator.validate(request)
                 if (violations.isNotEmpty()) {
@@ -60,7 +62,7 @@ class DemoRouter(private val validator: Validator, private val service: DemoServ
                 }
 
                 return@flatMap service.bar(request.msg)
-                    .flatMap { ServerResponse.ok().bodyValue(DemoResponse(it)) }
+                    .flatMap { ServerResponse.ok().bodyValue(DemoResponse(it, _anyField = request._anyField)) }
                     .onErrorResume(PredictableException::class) {
                         ServerResponse.ok()
                             .bodyValue(DemoErrorResponse(PredictableException.HTTP_STATUS, it.message!!))

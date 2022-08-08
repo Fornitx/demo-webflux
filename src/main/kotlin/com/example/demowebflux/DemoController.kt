@@ -29,6 +29,7 @@ class DemoController(private val service: DemoService) {
         @RequestHeader(TRACE_ID_HEADER) traceId: String,
         @RequestBody @Valid request: DemoRequest,
     ): Mono<DemoResponse> {
-        return service.foo(request.msg).map(::DemoResponse)
+        log.info { "/foo $traceId $request" }
+        return service.foo(request.msg).map { DemoResponse(it, _anyField = request._anyField) }
     }
 }

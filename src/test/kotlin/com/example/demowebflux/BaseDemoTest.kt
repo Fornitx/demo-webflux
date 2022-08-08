@@ -42,11 +42,12 @@ abstract class BaseDemoTest(
     @Test
     open fun testHappyWay() {
         val traceId = randomString()
+        val request = DemoRequest(MSG, _anyField = mapOf("A" to mapOf("B" to "C")))
 
         client.post()
             .uri(PATH)
             .header(TRACE_ID_HEADER, traceId)
-            .bodyValue(DemoRequest(MSG))
+            .bodyValue(request)
             .exchange()
             .expectStatus()
             .isOk
@@ -57,6 +58,7 @@ abstract class BaseDemoTest(
                 val response = it.responseBody!!
                 logger.info { response }
                 assertThat(response.msg).isEqualTo(happyWayMsg)
+                assertThat(response._anyField).isEqualTo(request._anyField)
             }
     }
 
