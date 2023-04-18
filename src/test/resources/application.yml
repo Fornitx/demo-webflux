@@ -1,0 +1,11 @@
+logging:
+  file:
+    path: logs
+  pattern:
+    dateformat: HH:mm:ss.SSS
+  logback:
+    rollingpolicy:
+      clean-history-on-start: true
+
+demo:
+  some-prop: 5
