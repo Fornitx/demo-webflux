@@ -1,5 +1,6 @@
-package com.example.demowebflux
+package com.example.demowebflux.rest
 
+import com.example.demowebflux.AbstractMetricsTest
 import com.example.demowebflux.data.DemoErrorResponse
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
@@ -10,7 +11,6 @@ import com.example.demowebflux.metrics.METRICS_TAG_PATH
 import com.example.demowebflux.utils.Constants
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.github.oshai.KotlinLogging
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,11 +21,9 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import java.util.*
 
-private val log = KotlinLogging.logger {}
-
 @SpringBootTest
 @AutoConfigureWebTestClient
-class BasicTest : AbstractMetricsTest() {
+class ControllerTest : AbstractMetricsTest() {
     @Autowired
     private lateinit var client: WebTestClient
 

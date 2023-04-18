@@ -5,9 +5,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
-import kotlin.collections.Map.Entry
 
-abstract class AbstractMetricsTest {
+abstract class AbstractMetricsTest : AbstractJUnitTest() {
     @Autowired
     private lateinit var meterRegistry: MeterRegistry
 
