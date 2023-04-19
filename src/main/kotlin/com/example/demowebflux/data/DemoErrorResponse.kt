@@ -1,18 +1,12 @@
 package com.example.demowebflux.data
 
-import com.example.demowebflux.errors.DemoError
+import java.time.OffsetDateTime
 
 data class DemoErrorResponse(
+    val timestamp: OffsetDateTime,
+    val path: String,
+    val requestId: String?,
     val code: Int,
     val message: String,
     val detailedMessage: String? = null
-) {
-    constructor(
-        demoError: DemoError,
-        throwable: Throwable,
-    ) : this(
-        demoError.code,
-        demoError.message,
-        throwable.message
-    )
-}
+)

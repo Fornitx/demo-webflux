@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service
 private val log = KotlinLogging.logger {}
 
 @Service
-class DemoService {
+class DemoService(private val client: DemoClient) {
     suspend fun foo(request: DemoRequest): DemoResponse {
         log.info { "Service calling" }
         if (request.msg == "666") {
             throw DemoRestException(DemoError.MSG_IS_666)
         }
-        return DemoResponse(request.msg.repeat(3), others = request.others)
+        return DemoResponse(client.call(request.msg), others = request.others)
     }
 }

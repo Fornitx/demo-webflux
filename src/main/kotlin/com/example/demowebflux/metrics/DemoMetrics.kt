@@ -36,7 +36,7 @@ class DemoMetrics(private val meterRegistry: MeterRegistry) {
             Constants.LOGSTASH_USER_ID to userId,
             Constants.LOGSTASH_RELATIVE_PATH to path,
         ) {
-            function()
+            return@withLoggingContext function()
         }
         sample.stop(httpTimings(path))
         return result

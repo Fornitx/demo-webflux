@@ -9,15 +9,16 @@ import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 
 @Component
-@Order(3)
-class AuthFilter : WebFilter {
+@Order(1)
+class RequestIdFilter : WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-        if (!exchange.request.uri.path.startsWith(Constants.PATH_V1)) {
-            return chain.filter(exchange)
+        val requestId = exchange.request.headers.getFirst(Constants.HEADER_X_REQUEST_ID)
+        if (requestId != null) {
+            exchange.response.beforeCommit {
+                exchange.response.headers.put(Constants.HEADER_X_REQUEST_ID, listOf(requestId))
+                Mono.empty()
+            }
         }
-
-        return chain.filter(exchange).contextWrite { ctx ->
-            ctx.put(Constants.CONTEXT_USER_ID, "John")
-        }
+        return chain.filter(exchange)
     }
 }
