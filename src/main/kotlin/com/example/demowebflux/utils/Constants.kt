@@ -8,6 +8,6 @@ object Constants {
     const val CONTEXT_USER_ID = "USER_ID"
 
     const val LOGSTASH_REQUEST_ID = "requestId"
-    const val LOGSTASH_USER_ID = "requestId"
+    const val LOGSTASH_USER_ID = "userId"
     const val LOGSTASH_RELATIVE_PATH = "relativePath"
 }

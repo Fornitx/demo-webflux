@@ -14,8 +14,6 @@ const val METRICS_TAG_CODE = "code"
 
 @Component
 class DemoMetrics(private val meterRegistry: MeterRegistry) {
-    // TODO Gauge
-
     fun httpTimings(path: String): Timer {
         return meterRegistry.timer(DemoMetrics::httpTimings.name, METRICS_TAG_PATH, path)
     }

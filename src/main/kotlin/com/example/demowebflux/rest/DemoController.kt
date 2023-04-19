@@ -24,7 +24,7 @@ class DemoController(private val service: DemoService, private val metrics: Demo
     )
     suspend fun foo(
         @RequestHeader(Constants.HEADER_X_REQUEST_ID) requestId: UUID,
-        @PathVariable("fooId") fooId: String,
+        @PathVariable fooId: String,
         @RequestBody @Valid request: DemoRequest,
     ): DemoResponse {
         val userId = coroutineContext[ReactorContext]!!.context.get<String>(Constants.CONTEXT_USER_ID)
