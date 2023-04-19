@@ -45,47 +45,48 @@ class GlobalErrorWebExceptionHandler(
         setMessageWriters(configurer.writers)
     }
 
-    private fun handleError(error: Throwable?): DemoError {
+    private fun getStatusAndDemoError(error: Throwable?): Pair<Int, DemoError> {
         if (error is DemoRestException) {
-            return error.demoError
+            return error.demoError.toPair()
         }
         if (error is ErrorResponse) {
             if (error.statusCode.is4xxClientError) {
-                return DemoError.UNEXPECTED_400_ERROR
+                return error.statusCode.value() to DemoError.UNEXPECTED_4XX_ERROR
+            } else if (error.statusCode.is5xxServerError) {
+                return error.statusCode.value() to DemoError.UNEXPECTED_5XX_ERROR
             }
         }
-        return DemoError.UNEXPECTED_500_ERROR
+        return DemoError.UNEXPECTED_5XX_ERROR.toPair()
     }
 
-    private fun getErrorAndAttributes(request: ServerRequest): Pair<DemoError, MutableMap<String, Any?>> {
+    private fun getErrorAndResponse(request: ServerRequest): Pair<DemoError, DemoErrorResponse> {
         val error = getError(request)
-        val demoError = handleError(error)
+        val (httpStatus, demoError) = getStatusAndDemoError(error)
         val errorResponse = DemoErrorResponse(
             OffsetDateTime.now(),
             request.path(),
             request.headers().firstHeader(Constants.HEADER_X_REQUEST_ID),
+            httpStatus,
             demoError.code,
             demoError.message,
-            error.message
+            error.message,
         )
-        val errorAttributes = objectMapper.convertValue<MutableMap<String, Any?>>(errorResponse)
-        return demoError to errorAttributes
+        return demoError to errorResponse
     }
 
     override fun renderErrorResponse(request: ServerRequest): Mono<ServerResponse> {
         val error = getError(request)
-        val (demoError, errorAttributes) = getErrorAndAttributes(request)
-        val httpStatus = demoError.httpStatus
+        val (demoError, errorResponse) = getErrorAndResponse(request)
+        val errorAttributes = objectMapper.convertValue<MutableMap<String, Any?>>(errorResponse)
+        val httpStatus = errorResponse.status
 
         metrics.error(demoError).increment()
 
         withLoggingContext(buildMap {
-            errorAttributes["requestId"]?.also {
-                put(Constants.LOGSTASH_REQUEST_ID, it.toString())
+            errorResponse.requestId?.also {
+                put(Constants.LOGSTASH_REQUEST_ID, it)
             }
-            errorAttributes["path"]?.also {
-                put(Constants.LOGSTASH_RELATIVE_PATH, it.toString())
-            }
+            put(Constants.LOGSTASH_RELATIVE_PATH, errorResponse.path)
         }) {
             if (log.isDebugEnabled) {
                 log.error(

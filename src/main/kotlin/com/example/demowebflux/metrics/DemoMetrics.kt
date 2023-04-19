@@ -11,6 +11,7 @@ import java.util.*
 
 const val METRICS_TAG_PATH = "path"
 const val METRICS_TAG_CODE = "code"
+const val METRICS_TAG_STATUS = "status"
 
 @Component
 class DemoMetrics(private val meterRegistry: MeterRegistry) {
@@ -18,8 +19,13 @@ class DemoMetrics(private val meterRegistry: MeterRegistry) {
         return meterRegistry.timer(DemoMetrics::httpTimings.name, METRICS_TAG_PATH, path)
     }
 
-    fun error(demoError: DemoError): Counter {
-        return meterRegistry.counter(DemoMetrics::error.name, METRICS_TAG_CODE, demoError.code.toString())
+    fun error(demoError: DemoError, status: Int? = null): Counter {
+        val finalStatus = status ?: demoError.httpStatus
+        return meterRegistry.counter(
+            DemoMetrics::error.name,
+            METRICS_TAG_CODE, demoError.code.toString(),
+            METRICS_TAG_STATUS, finalStatus.toString(),
+        )
     }
 
     suspend fun <T> withHttpTimings(
