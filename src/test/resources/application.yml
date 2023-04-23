@@ -12,3 +12,5 @@ demo:
   service:
     cache: true
     multiplier: 3
+  client:
+    url: PLACEHOLDER

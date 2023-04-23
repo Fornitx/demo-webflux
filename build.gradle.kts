@@ -37,6 +37,10 @@ dependencies {
     testImplementation(kotlin("test"))
 
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+
+    testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:5.0.0-alpha.11")
+    testImplementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.11")
+
 }
 
 tasks.compileKotlin {

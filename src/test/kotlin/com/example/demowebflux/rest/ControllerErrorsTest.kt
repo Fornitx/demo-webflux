@@ -8,7 +8,7 @@ import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.metrics.METRICS_TAG_CODE
-import com.example.demowebflux.rest.client.DemoClientImpl
+import com.example.demowebflux.rest.client.DemoClient
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
@@ -36,7 +36,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
     private lateinit var objectMapper: ObjectMapper
 
     @MockBean
-    private lateinit var clientMock: DemoClientImpl
+    private lateinit var clientMock: DemoClient
 
     private val validPath = PATH_V1 + "/foo/12"
     private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
