@@ -4,7 +4,6 @@ import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
 import com.example.demowebflux.constants.LOGSTASH_RELATIVE_PATH
 import com.example.demowebflux.constants.LOGSTASH_REQUEST_ID
 import com.example.demowebflux.constants.PATH_V1
-import io.github.oshai.KLogger
 import io.github.oshai.KotlinLogging
 import io.github.oshai.withLoggingContext
 import org.reactivestreams.Publisher
@@ -46,7 +45,7 @@ class LoggingFilter : WebFilter {
             }
         }
 
-        val result = chain.filter(LoggingWebExchange(log, exchange))
+        val result = chain.filter(LoggingWebExchange(exchange))
         if (!log.isDebugEnabled) {
             exchange.response.beforeCommit {
                 Mono.fromRunnable {
@@ -62,30 +61,28 @@ class LoggingFilter : WebFilter {
         return result
     }
 
-    class LoggingWebExchange(log: KLogger, delegate: ServerWebExchange) : ServerWebExchangeDecorator(delegate) {
-        private val requestDecorator: LoggingRequestDecorator = LoggingRequestDecorator(log, delegate.request)
+    class LoggingWebExchange(delegate: ServerWebExchange) : ServerWebExchangeDecorator(delegate) {
+        private val requestDecorator: LoggingRequestDecorator = LoggingRequestDecorator(delegate.request)
         private val responseDecorator: LoggingResponseDecorator =
-            LoggingResponseDecorator(log, delegate.request, delegate.response)
+            LoggingResponseDecorator(delegate.request, delegate.response)
 
         override fun getRequest(): ServerHttpRequest = requestDecorator
         override fun getResponse(): ServerHttpResponse = responseDecorator
     }
 
-    class LoggingRequestDecorator(log: KLogger, delegate: ServerHttpRequest) :
-        ServerHttpRequestDecorator(delegate) {
-
-        private val body: Flux<DataBuffer>?
+    class LoggingRequestDecorator(delegate: ServerHttpRequest) : ServerHttpRequestDecorator(delegate) {
+        private val body: Flux<DataBuffer>
 
         override fun getBody(): Flux<DataBuffer> {
-            return body!!
+            return body
         }
 
         init {
-            if (log.isDebugEnabled) {
-                body = super.getBody().doOnNext { buffer: DataBuffer ->
+            body = if (log.isDebugEnabled) {
+                super.getBody().doOnNext { dataBuffer ->
                     val bodyStream = ByteArrayOutputStream()
-                    // TODO Deprecated
-                    Channels.newChannel(bodyStream).write(buffer.asByteBuffer().asReadOnlyBuffer())
+                    val channel = Channels.newChannel(bodyStream)
+                    dataBuffer.readableByteBuffers().forEach(channel::write)
 
                     val requestId = delegate.headers.getFirst(HEADER_X_REQUEST_ID)
                     val relativePath = delegate.uri
@@ -98,40 +95,34 @@ class LoggingFilter : WebFilter {
                     }
                 }
             } else {
-                body = super.getBody()
+                super.getBody()
             }
         }
     }
 
     class LoggingResponseDecorator(
-        private val log: KLogger,
         private val request: ServerHttpRequest,
         delegate: ServerHttpResponse
-    ) :
-        ServerHttpResponseDecorator(delegate) {
-        override fun writeWith(body: Publisher<out DataBuffer>): Mono<Void> {
-            return if (log.isDebugEnabled) {
-                super.writeWith(Flux.from(body)
-                    .doOnNext { buffer: DataBuffer ->
-                        if (log.isDebugEnabled) {
-                            val bodyStream = ByteArrayOutputStream()
-                            // TODO Deprecated
-                            Channels.newChannel(bodyStream).write(buffer.asByteBuffer().asReadOnlyBuffer())
+    ) : ServerHttpResponseDecorator(delegate) {
+        override fun writeWith(body: Publisher<out DataBuffer>): Mono<Void> = if (log.isDebugEnabled) {
+            super.writeWith(Flux.from(body)
+                .doOnNext { dataBuffer ->
+                    val bodyStream = ByteArrayOutputStream()
+                    val channel = Channels.newChannel(bodyStream)
+                    dataBuffer.readableByteBuffers().forEach(channel::write)
 
-                            val requestId = request.headers.getFirst(HEADER_X_REQUEST_ID)
-                            val relativePath = request.uri
+                    val requestId = request.headers.getFirst(HEADER_X_REQUEST_ID)
+                    val relativePath = request.uri
 
-                            withLoggingContext(
-                                LOGSTASH_REQUEST_ID to requestId,
-                                LOGSTASH_RELATIVE_PATH to relativePath.path,
-                            ) {
-                                log.debug("Response [body={}]", String(bodyStream.toByteArray()))
-                            }
-                        }
-                    })
-            } else {
-                super.writeWith(body)
-            }
+                    withLoggingContext(
+                        LOGSTASH_REQUEST_ID to requestId,
+                        LOGSTASH_RELATIVE_PATH to relativePath.path,
+                    ) {
+                        log.debug("Response [body={}]", String(bodyStream.toByteArray()))
+                    }
+                })
+        } else {
+            super.writeWith(body)
         }
     }
 }
