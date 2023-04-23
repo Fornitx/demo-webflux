@@ -1,12 +1,13 @@
 package com.example.demowebflux.rest
 
 import com.example.demowebflux.AbstractMetricsTest
+import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
+import com.example.demowebflux.constants.PATH_V1
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
 import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.metrics.METRICS_TAG_PATH
 import com.example.demowebflux.rest.client.DemoClient
-import com.example.demowebflux.utils.Constants
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.test.runTest
@@ -29,6 +30,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
+import org.springframework.util.StringUtils
 import java.util.*
 
 @SpringBootTest
@@ -44,7 +46,7 @@ class ControllerSpyCaptorTest : AbstractMetricsTest() {
     @SpyBean
     private lateinit var clientSpy: DemoClient
 
-    private val validPath = Constants.PATH_V1 + "/foo/12"
+    private val validPath = PATH_V1 + "/foo/12"
     private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
 
     @Test
@@ -56,13 +58,13 @@ class ControllerSpyCaptorTest : AbstractMetricsTest() {
         val rawResponse = client
             .post()
             .uri(validPath)
-            .header(Constants.HEADER_X_REQUEST_ID, requestId)
+            .header(HEADER_X_REQUEST_ID, requestId)
             .bodyValue(validBody)
             .exchange()
             .expectStatus()
             .isOk
             .expectHeader()
-            .valueEquals(Constants.HEADER_X_REQUEST_ID, requestId)
+            .valueEquals(HEADER_X_REQUEST_ID, requestId)
             .expectBody<String>()
             .returnResult()
             .responseBody
@@ -106,10 +108,10 @@ class ControllerSpyCaptorTest : AbstractMetricsTest() {
     class MyConfiguration {
         @Primary
         @Bean
-        fun demoClient() : DemoClient {
+        fun demoClient(): DemoClient {
             return object : DemoClient {
                 override suspend fun call(msg: String): String {
-                    return msg.capitalize()
+                    return StringUtils.capitalize(msg)
                 }
             }
         }

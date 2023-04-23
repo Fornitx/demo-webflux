@@ -1,10 +1,12 @@
 package com.example.demowebflux.rest.filter
 
+import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
+import com.example.demowebflux.constants.LOGSTASH_RELATIVE_PATH
+import com.example.demowebflux.constants.LOGSTASH_REQUEST_ID
 import com.example.demowebflux.data.DemoErrorResponse
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.errors.DemoRestException
 import com.example.demowebflux.metrics.DemoMetrics
-import com.example.demowebflux.utils.Constants
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import io.github.oshai.KotlinLogging
@@ -65,7 +67,7 @@ class GlobalErrorWebExceptionHandler(
         val errorResponse = DemoErrorResponse(
             OffsetDateTime.now(),
             request.path(),
-            request.headers().firstHeader(Constants.HEADER_X_REQUEST_ID),
+            request.headers().firstHeader(HEADER_X_REQUEST_ID),
             httpStatus,
             demoError.code,
             demoError.message,
@@ -84,9 +86,9 @@ class GlobalErrorWebExceptionHandler(
 
         withLoggingContext(buildMap {
             errorResponse.requestId?.also {
-                put(Constants.LOGSTASH_REQUEST_ID, it)
+                put(LOGSTASH_REQUEST_ID, it)
             }
-            put(Constants.LOGSTASH_RELATIVE_PATH, errorResponse.path)
+            put(LOGSTASH_RELATIVE_PATH, errorResponse.path)
         }) {
             if (log.isDebugEnabled) {
                 log.error(

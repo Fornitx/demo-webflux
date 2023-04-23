@@ -1,13 +1,14 @@
 package com.example.demowebflux.rest
 
 import com.example.demowebflux.AbstractMetricsTest
+import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
+import com.example.demowebflux.constants.PATH_V1
 import com.example.demowebflux.data.DemoErrorResponse
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.metrics.METRICS_TAG_CODE
 import com.example.demowebflux.rest.client.DemoClientImpl
-import com.example.demowebflux.utils.Constants
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
@@ -37,7 +38,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
     @MockBean
     private lateinit var clientMock: DemoClientImpl
 
-    private val validPath = Constants.PATH_V1 + "/foo/12"
+    private val validPath = PATH_V1 + "/foo/12"
     private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
 
     @Test
@@ -45,13 +46,13 @@ class ControllerErrorsTest : AbstractMetricsTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.put()
             .uri(validPath)
-            .header(Constants.HEADER_X_REQUEST_ID, requestId)
+            .header(HEADER_X_REQUEST_ID, requestId)
             .bodyValue(validBody)
             .exchange()
             .expectStatus()
             .isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
             .expectHeader()
-            .valueEquals(Constants.HEADER_X_REQUEST_ID, requestId)
+            .valueEquals(HEADER_X_REQUEST_ID, requestId)
             .expectBody<String>()
             .returnResult()
             .responseBody
@@ -68,14 +69,14 @@ class ControllerErrorsTest : AbstractMetricsTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.post()
             .uri(validPath)
-            .header(Constants.HEADER_X_REQUEST_ID, requestId)
+            .header(HEADER_X_REQUEST_ID, requestId)
             .contentType(MediaType.TEXT_PLAIN)
             .bodyValue(objectMapper.writeValueAsString(validBody))
             .exchange()
             .expectStatus()
             .isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
             .expectHeader()
-            .valueEquals(Constants.HEADER_X_REQUEST_ID, requestId)
+            .valueEquals(HEADER_X_REQUEST_ID, requestId)
             .expectBody<String>()
             .returnResult()
             .responseBody
@@ -93,14 +94,14 @@ class ControllerErrorsTest : AbstractMetricsTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.post()
             .uri(validPath)
-            .header(Constants.HEADER_X_REQUEST_ID, requestId)
+            .header(HEADER_X_REQUEST_ID, requestId)
             .bodyValue(validBody)
             .accept(MediaType.TEXT_PLAIN)
             .exchange()
             .expectStatus()
             .isEqualTo(HttpStatus.NOT_ACCEPTABLE)
             .expectHeader()
-            .valueEquals(Constants.HEADER_X_REQUEST_ID, requestId)
+            .valueEquals(HEADER_X_REQUEST_ID, requestId)
             .expectBody<String>()
             .returnResult()
             .responseBody
@@ -122,7 +123,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
             .expectStatus()
             .isBadRequest
             .expectHeader()
-            .doesNotExist(Constants.HEADER_X_REQUEST_ID)
+            .doesNotExist(HEADER_X_REQUEST_ID)
             .expectBody<String>()
             .returnResult()
             .responseBody
@@ -130,7 +131,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
         assertRawResponse(
             rawResponse,
             DemoError.UNEXPECTED_4XX_ERROR,
-            "Required header '${Constants.HEADER_X_REQUEST_ID}' is not present"
+            "Required header '${HEADER_X_REQUEST_ID}' is not present"
         )
     }
 
@@ -139,14 +140,14 @@ class ControllerErrorsTest : AbstractMetricsTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.post()
             .uri(validPath)
-            .header(Constants.HEADER_X_REQUEST_ID, requestId)
+            .header(HEADER_X_REQUEST_ID, requestId)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("{{}".trim())
             .exchange()
             .expectStatus()
             .isBadRequest
             .expectHeader()
-            .valueEquals(Constants.HEADER_X_REQUEST_ID, requestId)
+            .valueEquals(HEADER_X_REQUEST_ID, requestId)
             .expectBody<String>()
             .returnResult()
             .responseBody
@@ -164,13 +165,13 @@ class ControllerErrorsTest : AbstractMetricsTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.post()
             .uri(validPath)
-            .header(Constants.HEADER_X_REQUEST_ID, requestId)
+            .header(HEADER_X_REQUEST_ID, requestId)
             .bodyValue(validBody.copy(msg = "ab"))
             .exchange()
             .expectStatus()
             .isBadRequest
             .expectHeader()
-            .valueEquals(Constants.HEADER_X_REQUEST_ID, requestId)
+            .valueEquals(HEADER_X_REQUEST_ID, requestId)
             .expectBody<String>()
             .returnResult()
             .responseBody
@@ -188,13 +189,13 @@ class ControllerErrorsTest : AbstractMetricsTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.post()
             .uri(validPath)
-            .header(Constants.HEADER_X_REQUEST_ID, requestId)
+            .header(HEADER_X_REQUEST_ID, requestId)
             .bodyValue(validBody.copy(tags = setOf()))
             .exchange()
             .expectStatus()
             .isBadRequest
             .expectHeader()
-            .valueEquals(Constants.HEADER_X_REQUEST_ID, requestId)
+            .valueEquals(HEADER_X_REQUEST_ID, requestId)
             .expectBody<String>()
             .returnResult()
             .responseBody
@@ -212,13 +213,13 @@ class ControllerErrorsTest : AbstractMetricsTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.post()
             .uri(validPath)
-            .header(Constants.HEADER_X_REQUEST_ID, requestId)
+            .header(HEADER_X_REQUEST_ID, requestId)
             .bodyValue(validBody.copy(msg = "666"))
             .exchange()
             .expectStatus()
             .isEqualTo(HttpStatus.CONFLICT)
             .expectHeader()
-            .valueEquals(Constants.HEADER_X_REQUEST_ID, requestId)
+            .valueEquals(HEADER_X_REQUEST_ID, requestId)
             .expectBody<String>()
             .returnResult()
             .responseBody

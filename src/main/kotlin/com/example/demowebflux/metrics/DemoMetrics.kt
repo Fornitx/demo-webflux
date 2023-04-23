@@ -1,7 +1,9 @@
 package com.example.demowebflux.metrics
 
+import com.example.demowebflux.constants.LOGSTASH_RELATIVE_PATH
+import com.example.demowebflux.constants.LOGSTASH_REQUEST_ID
+import com.example.demowebflux.constants.LOGSTASH_USER_ID
 import com.example.demowebflux.errors.DemoError
-import com.example.demowebflux.utils.Constants
 import com.github.benmanes.caffeine.cache.Cache
 import io.github.oshai.withLoggingContext
 import io.micrometer.core.instrument.Counter
@@ -29,17 +31,17 @@ class DemoMetrics(private val meterRegistry: MeterRegistry) {
         )
     }
 
-    suspend fun <T> withHttpTimings(
+    final inline fun <T> withHttpTimings(
         requestId: UUID,
         userId: String,
         path: String,
-        function: suspend () -> T,
+        function: () -> T,
     ): T {
         val sample = Timer.start()
         val result = withLoggingContext(
-            Constants.LOGSTASH_REQUEST_ID to requestId.toString(),
-            Constants.LOGSTASH_USER_ID to userId,
-            Constants.LOGSTASH_RELATIVE_PATH to path,
+            LOGSTASH_REQUEST_ID to requestId.toString(),
+            LOGSTASH_USER_ID to userId,
+            LOGSTASH_RELATIVE_PATH to path,
         ) {
             return@withLoggingContext function()
         }
