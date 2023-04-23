@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size
 
 data class DemoRequest(
     @JsonProperty("message")
-    @field:Size(min = 3)
+    @field:Size(min = 3, max = 256)
     val msg: String,
 
     @field:NullOrNotEmpty

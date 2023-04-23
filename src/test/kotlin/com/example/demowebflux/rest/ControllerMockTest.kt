@@ -5,6 +5,7 @@ import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
 import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.metrics.METRICS_TAG_PATH
+import com.example.demowebflux.rest.client.DemoClientImpl
 import com.example.demowebflux.utils.Constants
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -19,6 +20,8 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import java.util.*
@@ -27,6 +30,14 @@ import java.util.*
 @AutoConfigureWebTestClient
 @DirtiesContext
 class ControllerMockTest : AbstractMetricsTest() {
+    companion object {
+        @DynamicPropertySource
+        @JvmStatic
+        fun registerProperties(registry: DynamicPropertyRegistry) {
+            registry.add("demo.service.multiplier") { "6" }
+        }
+    }
+
     @Autowired
     private lateinit var client: WebTestClient
 
@@ -34,14 +45,14 @@ class ControllerMockTest : AbstractMetricsTest() {
     private lateinit var objectMapper: ObjectMapper
 
     @MockBean
-    private lateinit var clientMock: DemoClient
+    private lateinit var clientMock: DemoClientImpl
 
     private val validPath = Constants.PATH_V1 + "/foo/12"
-    private val validBody = DemoRequest("123", others = mapOf("a" to "b"))
+    private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
 
     @Test
     fun `200 OK`() = runTest {
-        whenever(clientMock.call(any())).then { (it.arguments.first() as String).repeat(6) }
+        whenever(clientMock.call(any())).then { (it.arguments.first() as String).capitalize() }
 
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client/*.mutate()
@@ -66,7 +77,7 @@ class ControllerMockTest : AbstractMetricsTest() {
 
         log.info { "response: $response" }
 
-        assertThat(response.msg).isEqualTo("123".repeat(6))
+        assertThat(response.msg).isEqualTo("Abc".repeat(6))
 
         verify(clientMock).call(validBody.msg)
 

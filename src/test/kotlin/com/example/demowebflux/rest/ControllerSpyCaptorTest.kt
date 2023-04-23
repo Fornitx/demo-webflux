@@ -5,6 +5,7 @@ import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
 import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.metrics.METRICS_TAG_PATH
+import com.example.demowebflux.rest.client.DemoClient
 import com.example.demowebflux.utils.Constants
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -21,7 +22,10 @@ import org.mockito.stubbing.Answer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
@@ -41,7 +45,7 @@ class ControllerSpyCaptorTest : AbstractMetricsTest() {
     private lateinit var clientSpy: DemoClient
 
     private val validPath = Constants.PATH_V1 + "/foo/12"
-    private val validBody = DemoRequest("123", others = mapOf("a" to "b"))
+    private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
 
     @Test
     fun `200 OK`() = runTest {
@@ -69,7 +73,7 @@ class ControllerSpyCaptorTest : AbstractMetricsTest() {
 
         log.info { "response: $response" }
 
-        assertThat(response.msg).isEqualTo("123".repeat(3))
+        assertThat(response.msg).isEqualTo("Abc".repeat(3))
 
         val argumentCaptor = argumentCaptor<String>()
         verify(clientSpy).call(argumentCaptor.capture())
@@ -78,7 +82,7 @@ class ControllerSpyCaptorTest : AbstractMetricsTest() {
             .first()
             .isEqualTo(validBody.msg)
 
-        assertThat(resultCaptor.result).isEqualTo("123".repeat(3))
+        assertThat(resultCaptor.result).isEqualTo("Abc")
 
         assertNoMeter(DemoMetrics::error.name)
         assertMeter(DemoMetrics::httpTimings.name, mapOf(METRICS_TAG_PATH to "/v1/foo/12"))
@@ -95,6 +99,19 @@ class ControllerSpyCaptorTest : AbstractMetricsTest() {
         override fun answer(invocationOnMock: InvocationOnMock): T? {
             result = invocationOnMock.callRealMethod() as T?
             return result
+        }
+    }
+
+    @TestConfiguration
+    class MyConfiguration {
+        @Primary
+        @Bean
+        fun demoClient() : DemoClient {
+            return object : DemoClient {
+                override suspend fun call(msg: String): String {
+                    return msg.capitalize()
+                }
+            }
         }
     }
 }

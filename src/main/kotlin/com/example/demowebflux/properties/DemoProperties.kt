@@ -13,6 +13,7 @@ data class DemoProperties(
 ) {
     data class ServiceProperties(
         val cache: Boolean,
+        @field:Min(1)
         val multiplier: Int,
     )
 }

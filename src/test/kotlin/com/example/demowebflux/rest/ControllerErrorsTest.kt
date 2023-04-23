@@ -6,6 +6,7 @@ import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.metrics.METRICS_TAG_CODE
+import com.example.demowebflux.rest.client.DemoClientImpl
 import com.example.demowebflux.utils.Constants
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -34,10 +35,10 @@ class ControllerErrorsTest : AbstractMetricsTest() {
     private lateinit var objectMapper: ObjectMapper
 
     @MockBean
-    private lateinit var clientMock: DemoClient
+    private lateinit var clientMock: DemoClientImpl
 
     private val validPath = Constants.PATH_V1 + "/foo/12"
-    private val validBody = DemoRequest("123", others = mapOf("a" to "b"))
+    private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
 
     @Test
     fun `405 MethodNotAllowed when method is put`() {
@@ -164,7 +165,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
         val rawResponse = client.post()
             .uri(validPath)
             .header(Constants.HEADER_X_REQUEST_ID, requestId)
-            .bodyValue(validBody.copy(msg = "12"))
+            .bodyValue(validBody.copy(msg = "ab"))
             .exchange()
             .expectStatus()
             .isBadRequest
@@ -177,8 +178,8 @@ class ControllerErrorsTest : AbstractMetricsTest() {
         assertRawResponse(
             rawResponse,
             DemoError.UNEXPECTED_4XX_ERROR,
-            "Field error in object 'demoRequest' on field 'msg': rejected value [12]",
-            "size must be between 3 and 2147483647"
+            "Field error in object 'demoRequest' on field 'msg': rejected value [ab]",
+            "size must be between 3 and 256"
         )
     }
 
