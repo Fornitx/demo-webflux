@@ -3,5 +3,8 @@ TODO list
   * Logger test
   * Parameterized Named test
   * OpenAPI generation
+  * message.properties
+  * Awaitility
+  * Resilience4j
 * Review
   * LoggingFilter

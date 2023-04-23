@@ -204,7 +204,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
             rawResponse,
             DemoError.UNEXPECTED_4XX_ERROR,
             "Field error in object 'demoRequest' on field 'tags': rejected value [[]]",
-            "{javax.validation.constraints.NullOrNotEmpty.message}"
+            "default message [Value must be null or not empty]"
         )
     }
 
