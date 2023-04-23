@@ -9,3 +9,6 @@ logging:
 
 demo:
   some-prop: 5
+  service:
+    cache: true
+    multiplier: 3

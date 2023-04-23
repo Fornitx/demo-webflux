@@ -28,6 +28,8 @@ dependencies {
 
     implementation("net.logstash.logback:logstash-logback-encoder:7.3")
 
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.6")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")

@@ -22,12 +22,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import java.util.*
 
 @SpringBootTest
 @AutoConfigureWebTestClient
+@DirtiesContext
 class ControllerSpyCaptorTest : AbstractMetricsTest() {
     @Autowired
     private lateinit var client: WebTestClient
@@ -80,6 +82,9 @@ class ControllerSpyCaptorTest : AbstractMetricsTest() {
 
         assertNoMeter(DemoMetrics::error.name)
         assertMeter(DemoMetrics::httpTimings.name, mapOf(METRICS_TAG_PATH to "/v1/foo/12"))
+
+        assertMeter(DemoMetrics::cacheHits.name, mapOf(), 0)
+        assertMeter(DemoMetrics::cacheMiss.name, mapOf(), 1)
     }
 
     @FunctionalInterface

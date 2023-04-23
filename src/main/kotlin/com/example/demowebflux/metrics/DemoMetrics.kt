@@ -2,6 +2,7 @@ package com.example.demowebflux.metrics
 
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.utils.Constants
+import com.github.benmanes.caffeine.cache.Cache
 import io.github.oshai.withLoggingContext
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
@@ -44,5 +45,13 @@ class DemoMetrics(private val meterRegistry: MeterRegistry) {
         }
         sample.stop(httpTimings(path))
         return result
+    }
+
+    fun cacheHits(cache: Cache<*, *>) {
+        meterRegistry.gauge(DemoMetrics::cacheHits.name, cache) { it.stats().hitCount().toDouble() }
+    }
+
+    fun cacheMiss(cache: Cache<*, *>) {
+        meterRegistry.gauge(DemoMetrics::cacheMiss.name, cache) { it.stats().missCount().toDouble() }
     }
 }

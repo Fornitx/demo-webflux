@@ -18,12 +18,14 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import java.util.*
 
 @SpringBootTest
 @AutoConfigureWebTestClient
+@DirtiesContext
 class ControllerErrorsTest : AbstractMetricsTest() {
     @Autowired
     private lateinit var client: WebTestClient

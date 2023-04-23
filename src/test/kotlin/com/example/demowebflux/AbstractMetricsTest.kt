@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 abstract class AbstractMetricsTest : AbstractJUnitTest() {
     @Autowired
-    private lateinit var meterRegistry: MeterRegistry
+    protected lateinit var meterRegistry: MeterRegistry
 
     @AfterEach
     fun clearMetrics() {
@@ -41,6 +41,8 @@ abstract class AbstractMetricsTest : AbstractJUnitTest() {
                 assertThat(matchedMeter.count()).isEqualTo(count.toDouble())
             } else if (matchedMeter is Timer) {
                 assertThat(matchedMeter.count()).isEqualTo(count.toLong())
+            } else if (matchedMeter is Gauge) {
+                assertThat(matchedMeter.value()).isEqualTo(count.toDouble())
             } else {
                 fail("Unsupported meter type '${matchedMeter::class}'")
             }

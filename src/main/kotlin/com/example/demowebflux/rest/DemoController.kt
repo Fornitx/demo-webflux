@@ -3,6 +3,7 @@ package com.example.demowebflux.rest
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
 import com.example.demowebflux.metrics.DemoMetrics
+import com.example.demowebflux.rest.service.DemoService
 import com.example.demowebflux.utils.Constants
 import io.github.oshai.KotlinLogging
 import jakarta.validation.Valid

@@ -9,4 +9,10 @@ import org.springframework.validation.annotation.Validated
 data class DemoProperties(
     @field:Min(5)
     val someProp: Int,
-)
+    val service: ServiceProperties,
+) {
+    data class ServiceProperties(
+        val cache: Boolean,
+        val multiplier: Int,
+    )
+}
