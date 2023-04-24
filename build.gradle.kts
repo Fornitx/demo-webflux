@@ -21,12 +21,16 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
 
     implementation("io.github.oshai:kotlin-logging-jvm:4.0.0-beta-27")
 
     implementation("net.logstash.logback:logstash-logback-encoder:7.3")
+
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.1.0")
 
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.6")
 

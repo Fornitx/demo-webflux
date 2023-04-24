@@ -3,6 +3,7 @@ package com.example.demowebflux.rest.filter
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
 import com.example.demowebflux.constants.LOGSTASH_RELATIVE_PATH
 import com.example.demowebflux.constants.LOGSTASH_REQUEST_ID
+import com.example.demowebflux.constants.PATH_V1
 import com.example.demowebflux.data.DemoErrorResponse
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.errors.DemoRestException
@@ -77,6 +78,10 @@ class GlobalErrorWebExceptionHandler(
     }
 
     override fun renderErrorResponse(request: ServerRequest): Mono<ServerResponse> {
+        if (!request.path().startsWith(PATH_V1)) {
+            return super.renderErrorResponse(request)
+        }
+
         val error = getError(request)
         val (demoError, errorResponse) = getErrorAndResponse(request)
         val errorAttributes = objectMapper.convertValue<MutableMap<String, Any?>>(errorResponse)
