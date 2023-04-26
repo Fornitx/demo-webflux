@@ -6,5 +6,3 @@ TODO list
   * message.properties
   * Awaitility
   * Resilience4j
-* Review
-  * LoggingFilter

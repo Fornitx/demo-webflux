@@ -1,9 +1,6 @@
 package com.example.demowebflux.rest.filter
 
-import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
-import com.example.demowebflux.constants.LOGSTASH_RELATIVE_PATH
-import com.example.demowebflux.constants.LOGSTASH_REQUEST_ID
-import com.example.demowebflux.constants.PATH_V1
+import com.example.demowebflux.constants.*
 import com.example.demowebflux.data.DemoErrorResponse
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.errors.DemoRestException
@@ -11,7 +8,6 @@ import com.example.demowebflux.metrics.DemoMetrics
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.convertValue
 import io.github.oshai.KotlinLogging
-import io.github.oshai.withLoggingContext
 import org.springframework.boot.autoconfigure.web.ServerProperties
 import org.springframework.boot.autoconfigure.web.WebProperties
 import org.springframework.boot.autoconfigure.web.reactive.error.DefaultErrorWebExceptionHandler
@@ -22,7 +18,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerCodecConfigurer
 import org.springframework.stereotype.Component
 import org.springframework.web.ErrorResponse
-import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.server.*
 import reactor.core.publisher.Mono
 import java.time.OffsetDateTime
@@ -89,28 +84,52 @@ class GlobalErrorWebExceptionHandler(
 
         metrics.error(demoError).increment()
 
-        withLoggingContext(buildMap {
-            errorResponse.requestId?.also {
-                put(LOGSTASH_REQUEST_ID, it)
-            }
-            put(LOGSTASH_RELATIVE_PATH, errorResponse.path)
-        }) {
-            if (log.isDebugEnabled) {
-                log.error(
-                    "Response [httpStatus={}, errorCode={}, body={}]",
+        if (RequestLogger.logger.isDebugEnabled) {
+            if (request.exchange().getAttribute<Boolean>(ATTRIBUTE_REQUEST_WAS_LOGGED) == true) {
+                RequestLogger.logErrorResponse(
+                    errorResponse.requestId,
+                    errorResponse.path,
                     httpStatus,
                     demoError.code,
-                    objectMapper.writeValueAsString(errorAttributes),
-                    error
+                    error,
+                    objectMapper.writeValueAsString(errorAttributes)
                 )
+                return ServerResponse.status(httpStatus)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(errorAttributes)
             } else {
-                log.error("Response [httpStatus={}, errorCode={}]", httpStatus, demoError.code, error)
+                return request.bodyToMono<String>().doOnNext {
+                    RequestLogger.logRequest(errorResponse.requestId, errorResponse.path, it)
+                    RequestLogger.logErrorResponse(
+                        errorResponse.requestId,
+                        errorResponse.path,
+                        httpStatus,
+                        demoError.code,
+                        error,
+                        objectMapper.writeValueAsString(errorAttributes)
+                    )
+                }.then(
+                    ServerResponse.status(httpStatus)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(errorAttributes)
+                )
             }
+        } else {
+            if (request.exchange().getAttribute<Boolean>(ATTRIBUTE_REQUEST_WAS_LOGGED) != true) {
+                RequestLogger.logRequest(errorResponse.requestId, errorResponse.path)
+            }
+            RequestLogger.logErrorResponse(
+                errorResponse.requestId,
+                errorResponse.path,
+                httpStatus,
+                demoError.code,
+                error,
+                objectMapper.writeValueAsString(errorAttributes)
+            )
+            return ServerResponse.status(httpStatus)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(errorAttributes)
         }
-
-        return ServerResponse.status(httpStatus)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(errorAttributes))
     }
 
     override fun logError(request: ServerRequest?, response: ServerResponse?, throwable: Throwable?) {

@@ -6,6 +6,8 @@ const val PATH_V1 = "/v1"
 
 const val HEADER_X_REQUEST_ID = "X-Request-Id"
 
+const val ATTRIBUTE_REQUEST_WAS_LOGGED = "requestWasLogged"
+
 const val CONTEXT_USER_ID = "USER_ID"
 
 const val LOGSTASH_REQUEST_ID = "requestId"

@@ -1,11 +1,6 @@
 package com.example.demowebflux.rest.filter
 
-import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
-import com.example.demowebflux.constants.LOGSTASH_RELATIVE_PATH
-import com.example.demowebflux.constants.LOGSTASH_REQUEST_ID
-import com.example.demowebflux.constants.PATH_V1
-import io.github.oshai.KotlinLogging
-import io.github.oshai.withLoggingContext
+import com.example.demowebflux.constants.*
 import org.reactivestreams.Publisher
 import org.springframework.core.annotation.Order
 import org.springframework.core.io.buffer.DataBuffer
@@ -23,8 +18,6 @@ import reactor.core.publisher.Mono
 import java.io.ByteArrayOutputStream
 import java.nio.channels.Channels
 
-private val log = KotlinLogging.logger {}
-
 @Component
 @Order(2)
 class LoggingFilter : WebFilter {
@@ -36,25 +29,16 @@ class LoggingFilter : WebFilter {
         val requestId = request.headers.getFirst(HEADER_X_REQUEST_ID)
         val relativePath = request.uri
 
-        if (!log.isDebugEnabled) {
-            withLoggingContext(
-                LOGSTASH_REQUEST_ID to requestId,
-                LOGSTASH_RELATIVE_PATH to relativePath.path,
-            ) {
-                log.info("Request")
-            }
+        if (!RequestLogger.logger.isDebugEnabled) {
+            exchange.attributes[ATTRIBUTE_REQUEST_WAS_LOGGED] = true
+            RequestLogger.logRequest(requestId, relativePath.path)
         }
 
         val result = chain.filter(LoggingWebExchange(exchange))
-        if (!log.isDebugEnabled) {
+        if (!RequestLogger.logger.isDebugEnabled) {
             exchange.response.beforeCommit {
                 Mono.fromRunnable {
-                    withLoggingContext(
-                        LOGSTASH_REQUEST_ID to requestId,
-                        LOGSTASH_RELATIVE_PATH to relativePath.path,
-                    ) {
-                        log.info("Response [code={}]", exchange.response.statusCode)
-                    }
+                    RequestLogger.logResponse(requestId, relativePath.path, exchange.response.statusCode?.value())
                 }
             }
         }
@@ -62,15 +46,14 @@ class LoggingFilter : WebFilter {
     }
 
     class LoggingWebExchange(delegate: ServerWebExchange) : ServerWebExchangeDecorator(delegate) {
-        private val requestDecorator: LoggingRequestDecorator = LoggingRequestDecorator(delegate.request)
-        private val responseDecorator: LoggingResponseDecorator =
-            LoggingResponseDecorator(delegate.request, delegate.response)
+        private val requestDecorator: LoggingRequestDecorator = LoggingRequestDecorator(delegate)
+        private val responseDecorator: LoggingResponseDecorator = LoggingResponseDecorator(delegate)
 
         override fun getRequest(): ServerHttpRequest = requestDecorator
         override fun getResponse(): ServerHttpResponse = responseDecorator
     }
 
-    class LoggingRequestDecorator(delegate: ServerHttpRequest) : ServerHttpRequestDecorator(delegate) {
+    class LoggingRequestDecorator(exchange: ServerWebExchange) : ServerHttpRequestDecorator(exchange.request) {
         private val body: Flux<DataBuffer>
 
         override fun getBody(): Flux<DataBuffer> {
@@ -78,21 +61,18 @@ class LoggingFilter : WebFilter {
         }
 
         init {
-            body = if (log.isDebugEnabled) {
+            body = if (RequestLogger.logger.isDebugEnabled) {
                 super.getBody().doOnNext { dataBuffer ->
                     val bodyStream = ByteArrayOutputStream()
                     val channel = Channels.newChannel(bodyStream)
                     dataBuffer.readableByteBuffers().forEach(channel::write)
 
-                    val requestId = delegate.headers.getFirst(HEADER_X_REQUEST_ID)
-                    val relativePath = delegate.uri
+                    val request = exchange.request
+                    val requestId = request.headers.getFirst(HEADER_X_REQUEST_ID)
+                    val relativePath = request.uri
 
-                    withLoggingContext(
-                        LOGSTASH_REQUEST_ID to requestId,
-                        LOGSTASH_RELATIVE_PATH to relativePath.path,
-                    ) {
-                        log.info("Request [body={}]", String(bodyStream.toByteArray()))
-                    }
+                    exchange.attributes[ATTRIBUTE_REQUEST_WAS_LOGGED] = true
+                    RequestLogger.logRequest(requestId, relativePath.path, String(bodyStream.toByteArray()))
                 }
             } else {
                 super.getBody()
@@ -101,25 +81,25 @@ class LoggingFilter : WebFilter {
     }
 
     class LoggingResponseDecorator(
-        private val request: ServerHttpRequest,
-        delegate: ServerHttpResponse
-    ) : ServerHttpResponseDecorator(delegate) {
-        override fun writeWith(body: Publisher<out DataBuffer>): Mono<Void> = if (log.isDebugEnabled) {
+        private val exchange: ServerWebExchange
+    ) : ServerHttpResponseDecorator(exchange.response) {
+        override fun writeWith(body: Publisher<out DataBuffer>): Mono<Void> = if (RequestLogger.logger.isDebugEnabled) {
             super.writeWith(Flux.from(body)
                 .doOnNext { dataBuffer ->
                     val bodyStream = ByteArrayOutputStream()
                     val channel = Channels.newChannel(bodyStream)
                     dataBuffer.readableByteBuffers().forEach(channel::write)
 
+                    val request = exchange.request
                     val requestId = request.headers.getFirst(HEADER_X_REQUEST_ID)
                     val relativePath = request.uri
 
-                    withLoggingContext(
-                        LOGSTASH_REQUEST_ID to requestId,
-                        LOGSTASH_RELATIVE_PATH to relativePath.path,
-                    ) {
-                        log.debug("Response [body={}]", String(bodyStream.toByteArray()))
-                    }
+                    RequestLogger.logResponse(
+                        requestId,
+                        relativePath.path,
+                        delegate.statusCode?.value(),
+                        String(bodyStream.toByteArray())
+                    )
                 })
         } else {
             super.writeWith(body)

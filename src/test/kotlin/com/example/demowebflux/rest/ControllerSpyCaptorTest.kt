@@ -1,6 +1,6 @@
 package com.example.demowebflux.rest
 
-import com.example.demowebflux.AbstractMetricsTest
+import com.example.demowebflux.AbstractLoggingTest
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
 import com.example.demowebflux.constants.PATH_V1
 import com.example.demowebflux.data.DemoRequest
@@ -38,7 +38,7 @@ import java.util.*
 ])
 @AutoConfigureWebTestClient
 @DirtiesContext
-class ControllerSpyCaptorTest : AbstractMetricsTest() {
+class ControllerSpyCaptorTest : AbstractLoggingTest() {
     @Autowired
     private lateinit var client: WebTestClient
 
@@ -70,6 +70,8 @@ class ControllerSpyCaptorTest : AbstractMetricsTest() {
             .expectBody<String>()
             .returnResult()
             .responseBody
+
+        assertLogger(3)
 
         log.info { "raw response: $rawResponse" }
 

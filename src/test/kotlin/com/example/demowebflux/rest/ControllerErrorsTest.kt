@@ -1,6 +1,6 @@
 package com.example.demowebflux.rest
 
-import com.example.demowebflux.AbstractMetricsTest
+import com.example.demowebflux.AbstractLoggingTest
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
 import com.example.demowebflux.constants.PATH_V1
 import com.example.demowebflux.data.DemoErrorResponse
@@ -28,7 +28,7 @@ import java.util.*
 @SpringBootTest
 @AutoConfigureWebTestClient
 @DirtiesContext
-class ControllerErrorsTest : AbstractMetricsTest() {
+class ControllerErrorsTest : AbstractLoggingTest() {
     @Autowired
     private lateinit var client: WebTestClient
 
@@ -57,6 +57,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
             .returnResult()
             .responseBody
 
+        assertLogger(2)
         assertRawResponse(
             rawResponse,
             DemoError.UNEXPECTED_4XX_ERROR,
@@ -81,6 +82,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
             .returnResult()
             .responseBody
 
+        assertLogger(2)
         assertRawResponse(
             rawResponse,
             DemoError.UNEXPECTED_4XX_ERROR,
@@ -106,6 +108,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
             .returnResult()
             .responseBody
 
+        assertLogger(2)
         assertRawResponse(
             rawResponse,
             DemoError.UNEXPECTED_4XX_ERROR,
@@ -128,6 +131,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
             .returnResult()
             .responseBody
 
+        assertLogger(2)
         assertRawResponse(
             rawResponse,
             DemoError.UNEXPECTED_4XX_ERROR,
@@ -152,6 +156,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
             .returnResult()
             .responseBody
 
+        assertLogger(2)
         assertRawResponse(
             rawResponse,
             DemoError.UNEXPECTED_4XX_ERROR,
@@ -176,6 +181,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
             .returnResult()
             .responseBody
 
+        assertLogger(2)
         assertRawResponse(
             rawResponse,
             DemoError.UNEXPECTED_4XX_ERROR,
@@ -200,6 +206,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
             .returnResult()
             .responseBody
 
+        assertLogger(2)
         assertRawResponse(
             rawResponse,
             DemoError.UNEXPECTED_4XX_ERROR,
@@ -224,6 +231,7 @@ class ControllerErrorsTest : AbstractMetricsTest() {
             .returnResult()
             .responseBody
 
+        assertLogger(3)
         assertRawResponse(rawResponse, DemoError.MSG_IS_666, DemoError.MSG_IS_666.message)
     }
 

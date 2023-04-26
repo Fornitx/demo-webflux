@@ -1,6 +1,6 @@
 package com.example.demowebflux.rest
 
-import com.example.demowebflux.AbstractMetricsTest
+import com.example.demowebflux.AbstractLoggingTest
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
 import com.example.demowebflux.constants.PATH_V1
 import com.example.demowebflux.constants.PREFIX_DEMO
@@ -36,7 +36,7 @@ import java.util.*
 @SpringBootTest
 @AutoConfigureWebTestClient
 @DirtiesContext
-class ControllerMockWebServerTest : AbstractMetricsTest() {
+class ControllerMockWebServerTest : AbstractLoggingTest() {
     companion object {
         val SERVER_PORT = TestSocketUtils.findAvailableTcpPort()
 
@@ -73,6 +73,8 @@ class ControllerMockWebServerTest : AbstractMetricsTest() {
             .expectBody<String>()
             .returnResult()
             .responseBody
+
+        assertLogger(3)
 
         log.info { "raw response: $rawResponse" }
 
