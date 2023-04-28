@@ -7,15 +7,20 @@ import com.example.demowebflux.errors.DemoRestException
 import com.example.demowebflux.properties.DemoProperties.ServiceProperties
 import com.example.demowebflux.rest.client.DemoClient
 import io.github.oshai.KotlinLogging
+import org.springframework.context.MessageSource
+import org.springframework.context.i18n.LocaleContextHolder
 
 private val log = KotlinLogging.logger {}
 
 class DemoServiceImpl(
     private val properties: ServiceProperties,
     private val client: DemoClient,
+    private val messageSource: MessageSource,
 ) : DemoService {
     override suspend fun foo(request: DemoRequest): DemoResponse {
-        log.info { "Service calling" }
+        log.info {
+            messageSource.getMessage("service.call", arrayOf(request.msg), LocaleContextHolder.getLocale())
+        }
         if (request.msg == "666") {
             throw DemoRestException(DemoError.MSG_IS_666)
         }
