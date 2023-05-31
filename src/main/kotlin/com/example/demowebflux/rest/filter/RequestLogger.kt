@@ -12,9 +12,9 @@ object RequestLogger : KLogging() {
             LOGSTASH_RELATIVE_PATH to relativePath,
         ) {
             if (logger.isDebugEnabled) {
-                logger.info("Request [body={}]", body)
+                logger.debug("Request [body={}]", body)
             } else {
-                logger.info("Request", body)
+                logger.info("Request")
             }
         }
     }
@@ -25,7 +25,7 @@ object RequestLogger : KLogging() {
             LOGSTASH_RELATIVE_PATH to relativePath,
         ) {
             if (logger.isDebugEnabled) {
-                logger.info("Response [httpStatus={}, body={}]", httpStatus, body)
+                logger.debug("Response [httpStatus={}, body={}]", httpStatus, body)
             } else {
                 logger.info("Response [httpStatus={}]", httpStatus)
             }

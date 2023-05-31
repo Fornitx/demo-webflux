@@ -56,9 +56,7 @@ class LoggingFilter : WebFilter {
     class LoggingRequestDecorator(exchange: ServerWebExchange) : ServerHttpRequestDecorator(exchange.request) {
         private val body: Flux<DataBuffer>
 
-        override fun getBody(): Flux<DataBuffer> {
-            return body
-        }
+        override fun getBody(): Flux<DataBuffer> = body
 
         init {
             body = if (RequestLogger.logger.isDebugEnabled) {

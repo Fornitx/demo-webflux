@@ -26,7 +26,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
 
-    implementation("io.github.oshai:kotlin-logging-jvm:4.0.0-beta-27")
+    implementation("io.github.oshai:kotlin-logging-jvm:4.0.0-beta-28")
 
     implementation("net.logstash.logback:logstash-logback-encoder:7.3")
 
