@@ -38,15 +38,15 @@ class DemoMetrics(private val meterRegistry: MeterRegistry) {
         function: () -> T,
     ): T {
         val sample = Timer.start()
-        val result = withLoggingContext(
+        return withLoggingContext(
             LOGSTASH_REQUEST_ID to requestId.toString(),
             LOGSTASH_USER_ID to userId,
             LOGSTASH_RELATIVE_PATH to path,
         ) {
-            return@withLoggingContext function()
+            function()
+        }.also {
+            sample.stop(httpTimings(path))
         }
-        sample.stop(httpTimings(path))
-        return result
     }
 
     fun cacheHits(cache: Cache<*, *>) {
