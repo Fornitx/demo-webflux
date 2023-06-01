@@ -2,8 +2,8 @@ package com.example.demowebflux
 
 import io.micrometer.core.instrument.*
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.fail
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.fail
 import org.springframework.beans.factory.annotation.Autowired
 
 abstract class AbstractMetricsTest : AbstractJUnitTest() {
@@ -18,7 +18,7 @@ abstract class AbstractMetricsTest : AbstractJUnitTest() {
     protected fun assertNoMeter(name: String) {
         val meters = meterRegistry.find(name).meters()
         assertThat(meters)
-            .`as`("Check meters [%s] is empty", meters.map { it.id })
+            .`as` { "Check meters [${meters.map { it.id }}] is empty" }
             .isEmpty()
     }
 
@@ -29,14 +29,14 @@ abstract class AbstractMetricsTest : AbstractJUnitTest() {
     protected fun assertMeters(name: String, tagsCountMap: Map<Map<String, String>, Int>) {
         val meters = meterRegistry.find(name).meters()
         assertThat(meters)
-            .`as`("Check meters [%s] has size %d", meters.map { it.id }, tagsCountMap.size)
+            .`as` { "Check meters [${meters.map { it.id }}] has size ${tagsCountMap.size}" }
             .hasSize(tagsCountMap.size)
 
         for ((tags, count) in tagsCountMap) {
             val matchedMeter = meters.singleOrNull { meter -> meter.matches(tags) }
 
             if (matchedMeter == null) {
-                fail("Meter %s is not found by tags [%s]", name, tags)
+                fail { "Meter $name is not found by tags [$tags]" }
             } else if (matchedMeter is Counter) {
                 assertThat(matchedMeter.count()).isEqualTo(count.toDouble())
             } else if (matchedMeter is Timer) {
@@ -44,7 +44,7 @@ abstract class AbstractMetricsTest : AbstractJUnitTest() {
             } else if (matchedMeter is Gauge) {
                 assertThat(matchedMeter.value()).isEqualTo(count.toDouble())
             } else {
-                fail("Unsupported meter type '${matchedMeter::class}'")
+                fail { "Unsupported meter type '${matchedMeter::class}'" }
             }
         }
     }

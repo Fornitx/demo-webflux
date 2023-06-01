@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.MediaType
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
@@ -59,6 +60,8 @@ class ControllerMockTest : AbstractLoggingTest() {
             .exchange()
             .expectStatus()
             .isOk
+            .expectHeader()
+            .contentType(MediaType.APPLICATION_JSON)
             .expectHeader()
             .valueEquals(HEADER_X_REQUEST_ID, requestId)
             .expectBody<String>()

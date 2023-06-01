@@ -37,7 +37,7 @@ class DemoMetrics(private val meterRegistry: MeterRegistry) {
         path: String,
         function: () -> T,
     ): T {
-        val sample = Timer.start()
+        val timer = Timer.start()
         return withLoggingContext(
             LOGSTASH_REQUEST_ID to requestId.toString(),
             LOGSTASH_USER_ID to userId,
@@ -45,15 +45,15 @@ class DemoMetrics(private val meterRegistry: MeterRegistry) {
         ) {
             function()
         }.also {
-            sample.stop(httpTimings(path))
+            timer.stop(httpTimings(path))
         }
     }
 
     fun cacheHits(cache: Cache<*, *>) {
-        meterRegistry.gauge(DemoMetrics::cacheHits.name, cache) { it.stats().hitCount().toDouble() }
+        meterRegistry.gauge(DemoMetrics::cacheHits.name, listOf(), cache) { it.stats().hitCount().toDouble() }
     }
 
     fun cacheMiss(cache: Cache<*, *>) {
-        meterRegistry.gauge(DemoMetrics::cacheMiss.name, cache) { it.stats().missCount().toDouble() }
+        meterRegistry.gauge(DemoMetrics::cacheMiss.name, listOf(), cache) { it.stats().missCount().toDouble() }
     }
 }

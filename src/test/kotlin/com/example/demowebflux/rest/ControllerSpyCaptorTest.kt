@@ -27,6 +27,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
+import org.springframework.http.MediaType
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
@@ -65,6 +66,8 @@ class ControllerSpyCaptorTest : AbstractLoggingTest() {
             .exchange()
             .expectStatus()
             .isOk
+            .expectHeader()
+            .contentType(MediaType.APPLICATION_JSON)
             .expectHeader()
             .valueEquals(HEADER_X_REQUEST_ID, requestId)
             .expectBody<String>()

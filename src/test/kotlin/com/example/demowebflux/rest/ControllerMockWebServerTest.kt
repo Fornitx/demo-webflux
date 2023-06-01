@@ -69,6 +69,8 @@ class ControllerMockWebServerTest : AbstractLoggingTest() {
             .expectStatus()
             .isOk
             .expectHeader()
+            .contentType(MediaType.APPLICATION_JSON)
+            .expectHeader()
             .valueEquals(HEADER_X_REQUEST_ID, requestId)
             .expectBody<String>()
             .returnResult()
