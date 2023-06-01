@@ -123,8 +123,7 @@ class GlobalErrorWebExceptionHandler(
                 errorResponse.path,
                 httpStatus,
                 demoError.code,
-                error,
-                objectMapper.writeValueAsString(errorAttributes)
+                error
             )
             return ServerResponse.status(httpStatus)
                 .contentType(MediaType.APPLICATION_JSON)

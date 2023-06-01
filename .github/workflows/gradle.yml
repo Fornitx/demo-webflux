@@ -38,5 +38,5 @@ jobs:
           --show-version
           --no-daemon
           -Dkotlin_version=1.8.21
-          -Dspring_version=3.0.7
+          -Dspring_version=3.1.0
           -Dspring_dm_version=1.1.0

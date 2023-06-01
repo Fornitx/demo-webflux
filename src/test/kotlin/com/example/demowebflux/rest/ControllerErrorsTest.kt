@@ -210,7 +210,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
         assertRawResponse(
             rawResponse,
             DemoError.UNEXPECTED_4XX_ERROR,
-            "Field error in object 'demoRequest' on field 'tags': rejected value [[]]",
+            "Field error in object 'demoRequest' on field 'tags': rejected value",
             "default message [Value must be null or not empty]"
         )
     }
