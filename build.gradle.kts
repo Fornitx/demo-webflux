@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("org.springframework.boot") version System.getProperty("spring_version")
     id("io.spring.dependency-management") version System.getProperty("spring_dm_version")
@@ -9,8 +11,8 @@ group = "com.example"
 version = "1.0.0-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_19
-    targetCompatibility = JavaVersion.VERSION_19
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 dependencies {
@@ -44,16 +46,15 @@ dependencies {
 
     testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:5.0.0-alpha.11")
     testImplementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.11")
-
 }
 
-tasks.compileKotlin {
+tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "19"
+        jvmTarget = "17"
     }
 }
 
-tasks.test {
+tasks.withType<Test> {
     useJUnitPlatform()
 }
