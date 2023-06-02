@@ -1,6 +1,6 @@
 package com.example.demowebflux.constants
 
-const val PREFIX_DEMO = "demo"
+const val PREFIX = "demo"
 
 const val PATH_V1 = "/v1"
 

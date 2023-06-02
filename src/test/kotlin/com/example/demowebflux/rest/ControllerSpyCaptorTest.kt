@@ -3,6 +3,7 @@ package com.example.demowebflux.rest
 import com.example.demowebflux.AbstractLoggingTest
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
 import com.example.demowebflux.constants.PATH_V1
+import com.example.demowebflux.constants.PREFIX
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
 import com.example.demowebflux.metrics.DemoMetrics
@@ -35,7 +36,7 @@ import org.springframework.util.StringUtils
 import java.util.*
 
 @SpringBootTest(properties = [
-    "demo.service.multiplier=6"
+    "$PREFIX.service.multiplier=6"
 ])
 @AutoConfigureWebTestClient
 @DirtiesContext
@@ -49,7 +50,7 @@ class ControllerSpyCaptorTest : AbstractLoggingTest() {
     @SpyBean
     private lateinit var clientSpy: DemoClient
 
-    private val validPath = PATH_V1 + "/foo/12"
+    private val validPath = "$PATH_V1/foo/12"
     private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
 
     @Test
@@ -94,7 +95,7 @@ class ControllerSpyCaptorTest : AbstractLoggingTest() {
         assertThat(resultCaptor.result).isEqualTo("Abc")
 
         assertNoMeter(DemoMetrics::error.name)
-        assertMeter(DemoMetrics::httpTimings.name, mapOf(METRICS_TAG_PATH to "/v1/foo/12"))
+        assertMeter(DemoMetrics::httpTimings.name, mapOf(METRICS_TAG_PATH to "$PATH_V1/foo/12"))
 
         assertMeter(DemoMetrics::cacheHits.name, mapOf(), 0)
         assertMeter(DemoMetrics::cacheMiss.name, mapOf(), 1)

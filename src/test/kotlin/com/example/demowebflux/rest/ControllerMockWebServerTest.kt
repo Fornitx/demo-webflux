@@ -3,7 +3,7 @@ package com.example.demowebflux.rest
 import com.example.demowebflux.AbstractLoggingTest
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
 import com.example.demowebflux.constants.PATH_V1
-import com.example.demowebflux.constants.PREFIX_DEMO
+import com.example.demowebflux.constants.PREFIX
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
 import com.example.demowebflux.metrics.DemoMetrics
@@ -43,8 +43,8 @@ class ControllerMockWebServerTest : AbstractLoggingTest() {
         @DynamicPropertySource
         @JvmStatic
         fun registerProperties(registry: DynamicPropertyRegistry) {
-            registry.add("$PREFIX_DEMO.service.multiplier") { "6" }
-            registry.add("$PREFIX_DEMO.client.url") { "http://localhost:$SERVER_PORT" }
+            registry.add("$PREFIX.service.multiplier") { "6" }
+            registry.add("$PREFIX.client.url") { "http://localhost:$SERVER_PORT" }
         }
     }
 
@@ -87,7 +87,7 @@ class ControllerMockWebServerTest : AbstractLoggingTest() {
         assertThat(response.msg).isEqualTo("Abc".repeat(6))
 
         assertNoMeter(DemoMetrics::error.name)
-        assertMeter(DemoMetrics::httpTimings.name, mapOf(METRICS_TAG_PATH to "/v1/foo/12"))
+        assertMeter(DemoMetrics::httpTimings.name, mapOf(METRICS_TAG_PATH to "$PATH_V1/foo/12"))
 
         assertMeter(DemoMetrics::cacheHits.name, mapOf(), 0)
         assertMeter(DemoMetrics::cacheMiss.name, mapOf(), 1)

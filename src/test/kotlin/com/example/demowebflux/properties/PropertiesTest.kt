@@ -1,6 +1,7 @@
 package com.example.demowebflux.properties
 
 import com.example.demowebflux.AbstractContextTest
+import com.example.demowebflux.constants.PREFIX
 import com.example.demowebflux.utils.TestProfiles
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -29,7 +30,7 @@ class PropertiesTest : AbstractContextTest() {
 
     @Test
     fun multiplierIsInvalid() {
-        contextRunner().withPropertyValues("demo.service.multiplier=-1").run { context ->
+        contextRunner().withPropertyValues("$PREFIX.service.multiplier=-1").run { context ->
             assertThat(context.startupFailure)
                 .isNotNull()
                 .rootCause()
