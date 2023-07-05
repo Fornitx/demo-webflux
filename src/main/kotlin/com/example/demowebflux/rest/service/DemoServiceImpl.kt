@@ -6,7 +6,7 @@ import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.errors.DemoRestException
 import com.example.demowebflux.properties.DemoProperties.ServiceProperties
 import com.example.demowebflux.rest.client.DemoClient
-import io.github.oshai.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.MessageSource
 import org.springframework.context.i18n.LocaleContextHolder
 

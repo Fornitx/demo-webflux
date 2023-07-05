@@ -2,8 +2,8 @@ package com.example.demowebflux.rest.filter
 
 import com.example.demowebflux.constants.LOGSTASH_RELATIVE_PATH
 import com.example.demowebflux.constants.LOGSTASH_REQUEST_ID
-import io.github.oshai.KLogging
-import io.github.oshai.withLoggingContext
+import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.withLoggingContext
 
 object RequestLogger : KLogging() {
     fun logRequest(requestId: String?, relativePath: String?, body: String? = null) {
