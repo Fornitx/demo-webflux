@@ -5,8 +5,9 @@ import com.example.demowebflux.constants.LOGSTASH_REQUEST_ID
 import com.example.demowebflux.constants.LOGSTASH_USER_ID
 import com.example.demowebflux.errors.DemoError
 import com.github.benmanes.caffeine.cache.Cache
-import io.github.oshai.withLoggingContext
+import io.github.oshai.kotlinlogging.withLoggingContext
 import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
 import org.springframework.stereotype.Component
@@ -19,13 +20,13 @@ const val METRICS_TAG_STATUS = "status"
 @Component
 class DemoMetrics(private val meterRegistry: MeterRegistry) {
     fun httpTimings(path: String): Timer {
-        return meterRegistry.timer(DemoMetrics::httpTimings.name, METRICS_TAG_PATH, path)
+        return timer("HTTP timings", DemoMetrics::httpTimings.name, METRICS_TAG_PATH, path)
     }
 
     fun error(demoError: DemoError, status: Int? = null): Counter {
         val finalStatus = status ?: demoError.httpStatus
-        return meterRegistry.counter(
-            DemoMetrics::error.name,
+        return counter(
+            "Appliccation errors", DemoMetrics::error.name,
             METRICS_TAG_CODE, demoError.code.toString(),
             METRICS_TAG_STATUS, finalStatus.toString(),
         )
@@ -50,10 +51,27 @@ class DemoMetrics(private val meterRegistry: MeterRegistry) {
     }
 
     fun cacheHits(cache: Cache<*, *>) {
-        meterRegistry.gauge(DemoMetrics::cacheHits.name, listOf(), cache) { it.stats().hitCount().toDouble() }
+        gauge("Cache hits", DemoMetrics::cacheHits.name) { cache.stats().hitCount().toDouble() }
     }
 
     fun cacheMiss(cache: Cache<*, *>) {
-        meterRegistry.gauge(DemoMetrics::cacheMiss.name, listOf(), cache) { it.stats().missCount().toDouble() }
+        gauge("Cache miss", DemoMetrics::cacheMiss.name) { cache.stats().missCount().toDouble() }
+    }
+
+    private final fun counter(description: String, name: String, vararg tags: String): Counter {
+        return Counter.builder(name).description(description).tags(*tags).register(meterRegistry)
+    }
+
+    private final fun timer(description: String, name: String, vararg tags: String): Timer {
+        return Timer.builder(name).description(description).tags(*tags).register(meterRegistry)
+    }
+
+    private final fun gauge(
+        description: String,
+        name: String,
+        vararg tags: String,
+        numberSupplier: () -> Number
+    ): Gauge {
+        return Gauge.builder(name, numberSupplier).description(description).tags(*tags).register(meterRegistry)
     }
 }
