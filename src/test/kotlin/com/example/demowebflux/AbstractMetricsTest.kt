@@ -1,5 +1,6 @@
 package com.example.demowebflux
 
+import com.example.demowebflux.metrics.DemoMetrics
 import io.micrometer.core.instrument.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -16,9 +17,10 @@ abstract class AbstractMetricsTest : AbstractJUnitTest() {
     }
 
     protected fun assertNoMeter(name: String) {
+        val name = DemoMetrics.name(name)
         val meters = meterRegistry.find(name).meters()
         assertThat(meters)
-            .`as` { "Check meters [${meters.map { it.id }}] is empty" }
+            .`as` { "Check meters [${meters.map { it.id }}] is empty for meter '$name'" }
             .isEmpty()
     }
 
@@ -27,13 +29,14 @@ abstract class AbstractMetricsTest : AbstractJUnitTest() {
     }
 
     protected fun assertMeters(name: String, tagsCountMap: Map<Map<String, String>, Int>) {
+        val name = DemoMetrics.name(name)
         val meters = meterRegistry.find(name).meters()
         assertThat(meters)
-            .`as` { "Check meters [${meters.map { it.id }}] has size ${tagsCountMap.size}" }
+            .`as` { "Check meters [${meters.map { it.id }}] has size ${tagsCountMap.size} for meter '$name'" }
             .hasSize(tagsCountMap.size)
 
         for ((tags, count) in tagsCountMap) {
-            val matchedMeter = meters.singleOrNull { meter -> meter.matches(tags) }
+            val matchedMeter = meters.singleOrNull { it.matches(tags) }
 
             if (matchedMeter == null) {
                 fail { "Meter $name is not found by tags [$tags]" }
@@ -54,7 +57,7 @@ abstract class AbstractMetricsTest : AbstractJUnitTest() {
     }
 
     private fun Meter.hasTag(key: String, value: String): Boolean {
-        return this.id.tags.any { tag -> tag.matches(key, value) }
+        return this.id.tags.any { it.matches(key, value) }
     }
 
     private fun Tag.matches(key: String, value: String): Boolean {

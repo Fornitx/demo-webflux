@@ -34,6 +34,7 @@ dependencies {
 
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.1.0")
 
+    implementation("com.google.guava:guava:32.1.1-jre")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.6")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")

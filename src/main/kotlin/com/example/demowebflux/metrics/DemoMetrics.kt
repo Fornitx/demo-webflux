@@ -5,6 +5,8 @@ import com.example.demowebflux.constants.LOGSTASH_REQUEST_ID
 import com.example.demowebflux.constants.LOGSTASH_USER_ID
 import com.example.demowebflux.errors.DemoError
 import com.github.benmanes.caffeine.cache.Cache
+import com.google.common.base.CaseFormat.LOWER_CAMEL
+import com.google.common.base.CaseFormat.LOWER_UNDERSCORE
 import io.github.oshai.kotlinlogging.withLoggingContext
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Gauge
@@ -18,7 +20,7 @@ const val METRICS_TAG_CODE = "code"
 const val METRICS_TAG_STATUS = "status"
 
 @Component
-class DemoMetrics(private val meterRegistry: MeterRegistry) {
+class DemoMetrics(private val registry: MeterRegistry) {
     fun httpTimings(path: String): Timer {
         return timer("HTTP timings", DemoMetrics::httpTimings.name, METRICS_TAG_PATH, path)
     }
@@ -59,11 +61,11 @@ class DemoMetrics(private val meterRegistry: MeterRegistry) {
     }
 
     private final fun counter(description: String, name: String, vararg tags: String): Counter {
-        return Counter.builder(name).description(description).tags(*tags).register(meterRegistry)
+        return Counter.builder(name(name)).description(description).tags(*tags).register(registry)
     }
 
     private final fun timer(description: String, name: String, vararg tags: String): Timer {
-        return Timer.builder(name).description(description).tags(*tags).register(meterRegistry)
+        return Timer.builder(name(name)).description(description).tags(*tags).register(registry)
     }
 
     private final fun gauge(
@@ -72,6 +74,12 @@ class DemoMetrics(private val meterRegistry: MeterRegistry) {
         vararg tags: String,
         numberSupplier: () -> Number
     ): Gauge {
-        return Gauge.builder(name, numberSupplier).description(description).tags(*tags).register(meterRegistry)
+        return Gauge.builder(name(name), numberSupplier).description(description).tags(*tags).register(registry)
+    }
+
+    companion object {
+        fun name(name: String): String {
+            return "demo_" + LOWER_CAMEL.to(LOWER_UNDERSCORE, name)
+        }
     }
 }
