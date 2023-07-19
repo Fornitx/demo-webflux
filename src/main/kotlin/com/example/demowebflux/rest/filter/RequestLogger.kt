@@ -2,19 +2,21 @@ package com.example.demowebflux.rest.filter
 
 import com.example.demowebflux.constants.LOGSTASH_RELATIVE_PATH
 import com.example.demowebflux.constants.LOGSTASH_REQUEST_ID
-import io.github.oshai.kotlinlogging.KLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.oshai.kotlinlogging.withLoggingContext
 
-object RequestLogger : KLogging() {
+object RequestLogger {
+    val log = KotlinLogging.logger { }
+
     fun logRequest(requestId: String?, relativePath: String?, body: String? = null) {
         withLoggingContext(
             LOGSTASH_REQUEST_ID to requestId,
             LOGSTASH_RELATIVE_PATH to relativePath,
         ) {
-            if (logger.isDebugEnabled) {
-                logger.debug("Request [body={}]", body)
+            if (log.isDebugEnabled()) {
+                log.debug { "Request [body=$body]" }
             } else {
-                logger.info("Request")
+                log.info { "Request" }
             }
         }
     }
@@ -24,10 +26,10 @@ object RequestLogger : KLogging() {
             LOGSTASH_REQUEST_ID to requestId,
             LOGSTASH_RELATIVE_PATH to relativePath,
         ) {
-            if (logger.isDebugEnabled) {
-                logger.debug("Response [httpStatus={}, body={}]", httpStatus, body)
+            if (log.isDebugEnabled()) {
+                log.debug { "Response [httpStatus=$httpStatus, body=$body]" }
             } else {
-                logger.info("Response [httpStatus={}]", httpStatus)
+                log.info { "Response [httpStatus=$httpStatus]" }
             }
         }
     }
@@ -44,16 +46,10 @@ object RequestLogger : KLogging() {
             LOGSTASH_REQUEST_ID to requestId,
             LOGSTASH_RELATIVE_PATH to relativePath,
         ) {
-            if (logger.isDebugEnabled) {
-                logger.error(
-                    "Response [httpStatus={}, errorCode={}, body={}]",
-                    httpStatus,
-                    errorCode,
-                    body,
-                    error
-                )
+            if (log.isDebugEnabled()) {
+                log.error(error) { "Response [httpStatus=$httpStatus, errorCode=$errorCode, body=$body]" }
             } else {
-                logger.error("Response [httpStatus={}, errorCode={}]", httpStatus, errorCode, error)
+                log.error(error) { "Response [httpStatus=$httpStatus, errorCode=$errorCode]" }
             }
         }
     }

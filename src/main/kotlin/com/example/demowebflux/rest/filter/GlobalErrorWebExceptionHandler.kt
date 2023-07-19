@@ -84,7 +84,7 @@ class GlobalErrorWebExceptionHandler(
 
         metrics.error(demoError).increment()
 
-        if (RequestLogger.logger.isDebugEnabled) {
+        if (RequestLogger.log.isDebugEnabled()) {
             if (request.exchange().getAttribute<Boolean>(ATTRIBUTE_REQUEST_WAS_LOGGED) == true) {
                 RequestLogger.logErrorResponse(
                     errorResponse.requestId,

@@ -7,7 +7,7 @@ import com.example.demowebflux.errors.DemoError
 import com.github.benmanes.caffeine.cache.Cache
 import com.google.common.base.CaseFormat.LOWER_CAMEL
 import com.google.common.base.CaseFormat.LOWER_UNDERSCORE
-import io.github.oshai.kotlinlogging.withLoggingContext
+import io.github.oshai.kotlinlogging.coroutines.withLoggingContextAsync
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
@@ -34,14 +34,14 @@ class DemoMetrics(private val registry: MeterRegistry) {
         )
     }
 
-    final inline fun <T> withHttpTimings(
+    final suspend inline fun <T> withHttpTimings(
         requestId: UUID,
         userId: String,
         path: String,
-        function: () -> T,
+        crossinline function: suspend () -> T,
     ): T {
         val timer = Timer.start()
-        return withLoggingContext(
+        return withLoggingContextAsync(
             LOGSTASH_REQUEST_ID to requestId.toString(),
             LOGSTASH_USER_ID to userId,
             LOGSTASH_RELATIVE_PATH to path,

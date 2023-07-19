@@ -29,13 +29,13 @@ class LoggingFilter : WebFilter {
         val requestId = request.headers.getFirst(HEADER_X_REQUEST_ID)
         val relativePath = request.uri
 
-        if (!RequestLogger.logger.isDebugEnabled) {
+        if (!RequestLogger.log.isDebugEnabled()) {
             exchange.attributes[ATTRIBUTE_REQUEST_WAS_LOGGED] = true
             RequestLogger.logRequest(requestId, relativePath.path)
         }
 
         val result = chain.filter(LoggingWebExchange(exchange))
-        if (!RequestLogger.logger.isDebugEnabled) {
+        if (!RequestLogger.log.isDebugEnabled()) {
             exchange.response.beforeCommit {
                 Mono.fromRunnable {
                     RequestLogger.logResponse(requestId, relativePath.path, exchange.response.statusCode?.value())
@@ -59,7 +59,7 @@ class LoggingFilter : WebFilter {
         override fun getBody(): Flux<DataBuffer> = body
 
         init {
-            body = if (RequestLogger.logger.isDebugEnabled) {
+            body = if (RequestLogger.log.isDebugEnabled()) {
                 super.getBody().doOnNext { dataBuffer ->
                     val bodyStream = ByteArrayOutputStream()
                     val channel = Channels.newChannel(bodyStream)
@@ -81,7 +81,7 @@ class LoggingFilter : WebFilter {
     class LoggingResponseDecorator(
         private val exchange: ServerWebExchange
     ) : ServerHttpResponseDecorator(exchange.response) {
-        override fun writeWith(body: Publisher<out DataBuffer>): Mono<Void> = if (RequestLogger.logger.isDebugEnabled) {
+        override fun writeWith(body: Publisher<out DataBuffer>): Mono<Void> = if (RequestLogger.log.isDebugEnabled()) {
             super.writeWith(Flux.from(body)
                 .doOnNext { dataBuffer ->
                     val bodyStream = ByteArrayOutputStream()
