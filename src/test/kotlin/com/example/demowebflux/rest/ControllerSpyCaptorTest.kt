@@ -34,6 +34,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import org.springframework.util.StringUtils
 import java.util.*
+import kotlin.test.assertEquals
 
 @SpringBootTest(properties = [
     "$PREFIX.service.multiplier=6"
@@ -83,7 +84,7 @@ class ControllerSpyCaptorTest : AbstractLoggingTest() {
 
         log.info { "response: $response" }
 
-        assertThat(response.msg).isEqualTo("Abc".repeat(6))
+        assertEquals("Abc".repeat(6), response.msg)
 
         val argumentCaptor = argumentCaptor<String>()
         verify(clientSpy).call(argumentCaptor.capture())
@@ -92,7 +93,7 @@ class ControllerSpyCaptorTest : AbstractLoggingTest() {
             .first()
             .isEqualTo(validBody.msg)
 
-        assertThat(resultCaptor.result).isEqualTo("Abc")
+        assertEquals("Abc", resultCaptor.result)
 
         assertNoMeter(DemoMetrics::error.name)
         assertMeter(DemoMetrics::httpTimings.name, mapOf(METRICS_TAG_PATH to "$PATH_V1/foo/12"))

@@ -4,8 +4,9 @@ import com.example.demowebflux.metrics.DemoMetrics
 import io.micrometer.core.instrument.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.fail
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.test.assertEquals
+import kotlin.test.fail
 
 abstract class AbstractMetricsTest : AbstractJUnitTest() {
     @Autowired
@@ -39,15 +40,15 @@ abstract class AbstractMetricsTest : AbstractJUnitTest() {
             val matchedMeter = meters.singleOrNull { it.matches(tags) }
 
             if (matchedMeter == null) {
-                fail { "Meter $name is not found by tags [$tags]" }
+                fail("Meter $name is not found by tags [$tags]")
             } else if (matchedMeter is Counter) {
-                assertThat(matchedMeter.count()).isEqualTo(count.toDouble())
+                assertEquals(count.toDouble(), matchedMeter.count())
             } else if (matchedMeter is Timer) {
-                assertThat(matchedMeter.count()).isEqualTo(count.toLong())
+                assertEquals(count.toLong(), matchedMeter.count())
             } else if (matchedMeter is Gauge) {
-                assertThat(matchedMeter.value()).isEqualTo(count.toDouble())
+                assertEquals(count.toDouble(), matchedMeter.value())
             } else {
-                fail { "Unsupported meter type '${matchedMeter::class}'" }
+                fail("Unsupported meter type '${matchedMeter::class}'")
             }
         }
     }

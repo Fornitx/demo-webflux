@@ -6,13 +6,14 @@ import com.example.demowebflux.utils.TestProfiles
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.context.properties.bind.validation.BindValidationException
+import kotlin.test.assertNull
 
 class PropertiesTest : AbstractContextTest() {
     @Test
     fun allOk() {
         contextRunner()
             .run { context ->
-                assertThat(context.startupFailure).isNull()
+                assertNull(context.startupFailure)
             }
     }
 

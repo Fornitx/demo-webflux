@@ -15,7 +15,6 @@ import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import mockwebserver3.RecordedRequest
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -32,6 +31,7 @@ import org.springframework.test.web.reactive.server.expectBody
 import org.springframework.util.StringUtils
 import java.nio.charset.Charset
 import java.util.*
+import kotlin.test.assertEquals
 
 @SpringBootTest
 @AutoConfigureWebTestClient
@@ -84,7 +84,7 @@ class ControllerMockWebServerTest : AbstractLoggingTest() {
 
         log.info { "response: $response" }
 
-        assertThat(response.msg).isEqualTo("Abc".repeat(6))
+        assertEquals("Abc".repeat(6), response.msg)
 
         assertNoMeter(DemoMetrics::error.name)
         assertMeter(DemoMetrics::httpTimings.name, mapOf(METRICS_TAG_PATH to "$PATH_V1/foo/12"))

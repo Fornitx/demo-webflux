@@ -3,7 +3,7 @@ package com.example.demowebflux
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.LoggerFactory
@@ -25,6 +25,6 @@ abstract class AbstractLoggingTest : AbstractMetricsTest() {
     }
 
     protected fun assertLogger(count: Int) {
-        Assertions.assertThat(appender!!.list).hasSize(count)
+        assertThat(appender!!.list).hasSize(count)
     }
 }

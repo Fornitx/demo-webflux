@@ -12,7 +12,6 @@ import com.example.demowebflux.rest.client.DemoClient
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.test.runTest
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
@@ -27,6 +26,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import org.springframework.util.StringUtils
 import java.util.*
+import kotlin.test.assertEquals
 
 @SpringBootTest(properties = [
     "$PREFIX.service.multiplier=6"
@@ -77,7 +77,7 @@ class ControllerMockTest : AbstractLoggingTest() {
 
         log.info { "response: $response" }
 
-        assertThat(response.msg).isEqualTo("Abc".repeat(6))
+        assertEquals("Abc".repeat(6), response.msg)
 
         verify(clientMock).call(validBody.msg)
 

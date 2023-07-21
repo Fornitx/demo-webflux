@@ -11,7 +11,6 @@ import com.example.demowebflux.metrics.METRICS_TAG_CODE
 import com.example.demowebflux.rest.client.DemoClient
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.verifyNoInteractions
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,6 +23,8 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import java.util.*
+import kotlin.test.assertContains
+import kotlin.test.assertEquals
 
 @SpringBootTest
 @AutoConfigureWebTestClient
@@ -259,9 +260,9 @@ class ControllerErrorsTest : AbstractLoggingTest() {
         log.info { "response: $response" }
 
         // TODO check status
-        assertThat(response.code).isEqualTo(demoError.code)
+        assertEquals(demoError.code, response.code)
         for (message in messages) {
-            assertThat(response.detailedMessage).contains(message)
+            assertContains(response.detailedMessage!!, message)
         }
 
         verifyNoInteractions(clientMock)
