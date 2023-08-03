@@ -14,3 +14,7 @@ demo:
     multiplier: 3
   client:
     url: PLACEHOLDER
+    response-timeout: 3s
+    connection-timeout: 3s
+    read-timeout: 3s
+    write-timeout: 3s
