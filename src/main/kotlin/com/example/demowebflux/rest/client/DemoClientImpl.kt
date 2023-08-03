@@ -8,11 +8,10 @@ import org.springframework.web.reactive.function.client.awaitEntity
 import org.springframework.web.reactive.function.client.awaitExchange
 
 class DemoClientImpl(private val properties: DemoProperties.ClientProperties) : DemoClient {
+    private val client = WebClient.create(properties.url)
+
     override suspend fun call(msg: String): String {
-        return WebClient.builder()
-            .build()
-            .post()
-            .uri(properties.url)
+        return client.post()
             .bodyValue(msg)
             .awaitExchange<ResponseEntity<String>>(ClientResponse::awaitEntity)
             .body!!
