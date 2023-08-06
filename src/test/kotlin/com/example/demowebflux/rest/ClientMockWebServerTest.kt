@@ -8,57 +8,57 @@ import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
 import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.metrics.METRICS_TAG_PATH
-import com.example.demowebflux.rest.client.DemoClient
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.test.runTest
-import org.assertj.core.api.Assertions.assertThat
+import mockwebserver3.Dispatcher
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
+import mockwebserver3.RecordedRequest
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
-import org.mockito.stubbing.Answer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.boot.test.mock.mockito.SpyBean
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Primary
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
+import org.springframework.test.util.TestSocketUtils
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import org.springframework.util.StringUtils
+import java.nio.charset.Charset
 import java.util.*
 import kotlin.test.assertEquals
 
-@SpringBootTest(properties = [
-    "$PREFIX.service.multiplier=6"
-])
+@SpringBootTest
 @AutoConfigureWebTestClient
 @DirtiesContext
-class ControllerSpyCaptorTest : AbstractLoggingTest() {
+class ClientMockWebServerTest : AbstractLoggingTest() {
+    companion object {
+        val SERVER_PORT = TestSocketUtils.findAvailableTcpPort()
+
+        @DynamicPropertySource
+        @JvmStatic
+        fun registerProperties(registry: DynamicPropertyRegistry) {
+            registry.add("$PREFIX.service.multiplier") { "6" }
+            registry.add("$PREFIX.client.url") { "http://localhost:$SERVER_PORT" }
+        }
+    }
+
     @Autowired
     private lateinit var client: WebTestClient
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    @SpyBean
-    private lateinit var clientSpy: DemoClient
-
-    private val validPath = "$PATH_V1/foo/12"
+    private val validPath = PATH_V1 + "/foo/12"
     private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
 
     @Test
-    fun `200 OK`() = runTest {
-        val resultCaptor = ResultCaptor<String>()
-        Mockito.doAnswer(resultCaptor).whenever(clientSpy).call(any())
-
+    fun `200 OK`() = mockWebServer(SERVER_PORT) {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client
             .post()
@@ -86,15 +86,6 @@ class ControllerSpyCaptorTest : AbstractLoggingTest() {
 
         assertEquals("Abc".repeat(6), response.msg)
 
-        val argumentCaptor = argumentCaptor<String>()
-        verify(clientSpy).call(argumentCaptor.capture())
-        assertThat(argumentCaptor.allValues)
-            .hasSize(1)
-            .first()
-            .isEqualTo(validBody.msg)
-
-        assertEquals("Abc", resultCaptor.result)
-
         assertNoMeter(DemoMetrics::error.name)
         assertMeter(DemoMetrics::httpTimings.name, mapOf(METRICS_TAG_PATH to "$PATH_V1/foo/12"))
 
@@ -102,26 +93,19 @@ class ControllerSpyCaptorTest : AbstractLoggingTest() {
         assertMeter(DemoMetrics::cacheMiss.name, mapOf(), 1)
     }
 
-    class ResultCaptor<T> : Answer<Any?> {
-        var result: T? = null
-            private set
-
-        override fun answer(invocationOnMock: InvocationOnMock): T? {
-            result = invocationOnMock.callRealMethod() as T?
-            return result
-        }
-    }
-
-    @TestConfiguration
-    class MyConfiguration {
-        @Primary
-        @Bean
-        fun demoClient(): DemoClient {
-            return object : DemoClient {
-                override suspend fun call(msg: String): String {
-                    return StringUtils.capitalize(msg)
-                }
+    private fun mockWebServer(port: Int, function: suspend () -> Unit) = MockWebServer().use { server ->
+        server.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                val body = request.body.readString(Charset.defaultCharset())
+                return MockResponse()
+                    .setResponseCode(HttpStatus.OK.value())
+                    .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE)
+                    .setBody(StringUtils.capitalize(body))
             }
+        }
+        server.start(port)
+        runTest {
+            function()
         }
     }
 }

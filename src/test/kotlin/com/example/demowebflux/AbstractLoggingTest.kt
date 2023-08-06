@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 
 abstract class AbstractLoggingTest : AbstractMetricsTest() {
     private var appender: ListAppender<ILoggingEvent>? = null
-    private val logbackRootLogger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME) as Logger
+    private val logbackRootLogger = LoggerFactory.getLogger("com.example") as Logger
 
     @BeforeEach
     fun addAppender() {

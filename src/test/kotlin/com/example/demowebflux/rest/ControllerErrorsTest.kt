@@ -8,6 +8,7 @@ import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.metrics.METRICS_TAG_CODE
+import com.example.demowebflux.metrics.METRICS_TAG_STATUS
 import com.example.demowebflux.rest.client.DemoClient
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -268,6 +269,11 @@ class ControllerErrorsTest : AbstractLoggingTest() {
         verifyNoInteractions(clientMock)
 
         assertNoMeter(DemoMetrics::httpTimings.name)
-        assertMeter(DemoMetrics::error.name, mapOf(METRICS_TAG_CODE to demoError.code.toString()))
+        assertMeter(
+            DemoMetrics::error.name, mapOf(
+                METRICS_TAG_CODE to demoError.code.toString(),
+                METRICS_TAG_STATUS to demoError.httpStatus.toString()
+            )
+        )
     }
 }

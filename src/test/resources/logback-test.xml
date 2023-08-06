@@ -27,4 +27,5 @@
 
     <logger name="com.example.demowebflux" level="TRACE"/>
 
+    <logger name="reactor.netty.http.client.HttpClient" level="DEBUG"/>
 </configuration>

@@ -2,6 +2,7 @@ package com.example.demowebflux.rest.client
 
 import com.example.demowebflux.properties.DemoProperties
 import io.netty.channel.ChannelOption
+import io.netty.handler.logging.LogLevel
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.handler.timeout.WriteTimeoutHandler
 import org.springframework.http.ResponseEntity
@@ -11,6 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitEntity
 import org.springframework.web.reactive.function.client.awaitExchange
 import reactor.netty.http.client.HttpClient
+import reactor.netty.transport.logging.AdvancedByteBufFormat
 import java.util.concurrent.TimeUnit
 
 class DemoClientImpl(private val properties: DemoProperties.ClientProperties) : DemoClient {
@@ -25,6 +27,7 @@ class DemoClientImpl(private val properties: DemoProperties.ClientProperties) : 
                         conn.addHandler(ReadTimeoutHandler(properties.readTimeout.toMillis(), TimeUnit.MILLISECONDS))
                         conn.addHandler(WriteTimeoutHandler(properties.writeTimeout.toMillis(), TimeUnit.MILLISECONDS))
                     }
+                    .wiretap("reactor.netty.http.client.HttpClient", LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL)
             )
         )
         .build()
