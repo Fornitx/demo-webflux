@@ -20,7 +20,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
@@ -33,7 +32,7 @@ dependencies {
 
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.1.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.2.0")
 
     implementation("com.google.guava:guava:32.1.1-jre")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.6")
@@ -44,7 +43,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
 
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.0.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
 
     testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:5.0.0-alpha.11")
     testImplementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.11")
@@ -52,7 +51,7 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
+        freeCompilerArgs = listOf("-Xjsr305=strict", "-Xemit-jvm-type-annotations")
         jvmTarget = "20"
     }
 }

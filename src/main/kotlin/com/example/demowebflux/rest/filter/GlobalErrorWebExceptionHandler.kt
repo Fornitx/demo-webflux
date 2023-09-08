@@ -1,6 +1,8 @@
 package com.example.demowebflux.rest.filter
 
-import com.example.demowebflux.constants.*
+import com.example.demowebflux.constants.ATTRIBUTE_REQUEST_WAS_LOGGED
+import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
+import com.example.demowebflux.constants.PATH_V1
 import com.example.demowebflux.data.DemoErrorResponse
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.errors.DemoRestException
@@ -18,10 +20,11 @@ import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerCodecConfigurer
 import org.springframework.stereotype.Component
 import org.springframework.web.ErrorResponse
-import org.springframework.web.reactive.function.server.*
+import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.bodyToMono
 import reactor.core.publisher.Mono
 import java.time.OffsetDateTime
-import java.util.*
 
 private val log = KotlinLogging.logger {}
 
@@ -100,6 +103,11 @@ class GlobalErrorWebExceptionHandler(
             } else {
                 return request.bodyToMono<String>().doOnNext {
                     RequestLogger.logRequest(errorResponse.requestId, errorResponse.path, it)
+                }.switchIfEmpty(
+                    Mono.fromRunnable {
+                        RequestLogger.logRequest(errorResponse.requestId, errorResponse.path)
+                    }
+                ).doFinally {
                     RequestLogger.logErrorResponse(
                         errorResponse.requestId,
                         errorResponse.path,
