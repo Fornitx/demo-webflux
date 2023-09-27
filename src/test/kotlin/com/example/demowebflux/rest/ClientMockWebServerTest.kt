@@ -8,6 +8,7 @@ import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
 import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.metrics.METRICS_TAG_PATH
+import com.example.demowebflux.utils.JwtTestUtils
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.test.runTest
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.annotation.DirtiesContext
@@ -63,6 +65,7 @@ class ClientMockWebServerTest : AbstractLoggingTest() {
         val rawResponse = client
             .post()
             .uri(validPath)
+            .header(AUTHORIZATION, JwtTestUtils.TOKEN)
             .header(HEADER_X_REQUEST_ID, requestId)
             .bodyValue(validBody)
             .exchange()
@@ -88,9 +91,6 @@ class ClientMockWebServerTest : AbstractLoggingTest() {
 
         assertNoMeter(DemoMetrics::error.name)
         assertMeter(DemoMetrics::httpTimings.name, mapOf(METRICS_TAG_PATH to "$PATH_V1/foo/12"))
-
-        assertMeter(DemoMetrics::cacheHits.name, mapOf(), 0)
-        assertMeter(DemoMetrics::cacheMiss.name, mapOf(), 1)
     }
 
     private fun mockWebServer(port: Int, function: suspend () -> Unit) = MockWebServer().use { server ->

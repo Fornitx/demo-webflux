@@ -10,6 +10,7 @@ import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.metrics.METRICS_TAG_CODE
 import com.example.demowebflux.metrics.METRICS_TAG_STATUS
 import com.example.demowebflux.rest.client.DemoClient
+import com.example.demowebflux.utils.JwtTestUtils
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.junit.jupiter.api.Test
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.annotation.DirtiesContext
@@ -48,6 +50,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.put()
             .uri(validPath)
+            .header(AUTHORIZATION, JwtTestUtils.TOKEN)
             .header(HEADER_X_REQUEST_ID, requestId)
             .bodyValue(validBody)
             .exchange()
@@ -74,6 +77,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.post()
             .uri(validPath)
+            .header(AUTHORIZATION, JwtTestUtils.TOKEN)
             .header(HEADER_X_REQUEST_ID, requestId)
             .contentType(MediaType.TEXT_PLAIN)
             .bodyValue(objectMapper.writeValueAsString(validBody))
@@ -102,6 +106,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.post()
             .uri(validPath)
+            .header(AUTHORIZATION, JwtTestUtils.TOKEN)
             .header(HEADER_X_REQUEST_ID, requestId)
             .bodyValue(validBody)
             .accept(MediaType.TEXT_PLAIN)
@@ -129,6 +134,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
     fun `400 BadRequest when request header is missing`() {
         val rawResponse = client.post()
             .uri(validPath)
+            .header(AUTHORIZATION, JwtTestUtils.TOKEN)
             .bodyValue(validBody)
             .exchange()
             .expectStatus()
@@ -154,6 +160,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.post()
             .uri(validPath)
+            .header(AUTHORIZATION, JwtTestUtils.TOKEN)
             .header(HEADER_X_REQUEST_ID, requestId)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("{{}".trim())
@@ -182,6 +189,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.post()
             .uri(validPath)
+            .header(AUTHORIZATION, JwtTestUtils.TOKEN)
             .header(HEADER_X_REQUEST_ID, requestId)
             .bodyValue(validBody.copy(msg = "ab"))
             .exchange()
@@ -209,6 +217,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.post()
             .uri(validPath)
+            .header(AUTHORIZATION, JwtTestUtils.TOKEN)
             .header(HEADER_X_REQUEST_ID, requestId)
             .bodyValue(validBody.copy(tags = setOf()))
             .exchange()
@@ -236,6 +245,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.post()
             .uri(validPath)
+            .header(AUTHORIZATION, JwtTestUtils.TOKEN)
             .header(HEADER_X_REQUEST_ID, requestId)
             .bodyValue(validBody.copy(msg = "666"))
             .exchange()

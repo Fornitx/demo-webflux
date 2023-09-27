@@ -10,6 +10,7 @@ import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.metrics.METRICS_TAG_CODE
 import com.example.demowebflux.metrics.METRICS_TAG_STATUS
+import com.example.demowebflux.utils.JwtTestUtils
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.test.runTest
@@ -19,6 +20,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -68,6 +70,7 @@ class ClientMockWebServerErrorsTest : AbstractLoggingTest() {
         val rawResponse = client
             .post()
             .uri(validPath)
+            .header(AUTHORIZATION, JwtTestUtils.TOKEN)
             .header(HEADER_X_REQUEST_ID, requestId)
             .bodyValue(validBody)
             .exchange()

@@ -28,7 +28,7 @@ class DemoConfig {
     ): DemoService {
         val service = DemoServiceImpl(properties.service, client, messageSource)
         return if (properties.service.cache) {
-            CachingDemoServiceImpl(service, metrics)
+            CachingDemoServiceImpl(service)
         } else {
             service
         }

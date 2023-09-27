@@ -10,6 +10,7 @@ import com.example.demowebflux.rest.service.DemoService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.Valid
 import kotlinx.coroutines.reactor.ReactorContext
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -26,6 +27,7 @@ class DemoController(private val service: DemoService, private val metrics: Demo
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     suspend fun foo(
+        @RequestHeader(AUTHORIZATION) authorization: String,
         @RequestHeader(HEADER_X_REQUEST_ID) requestId: UUID,
         @PathVariable fooId: String,
         @RequestBody @Valid request: DemoRequest,

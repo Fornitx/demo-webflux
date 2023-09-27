@@ -17,6 +17,8 @@ java {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+//    implementation("org.springframework.boot:spring-boot-starter-cache")
+//    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
 
@@ -28,16 +30,19 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 
-    implementation("io.github.oshai:kotlin-logging-jvm:${System.getProperty("kotlin_logging_version")}")
+    implementation("io.github.oshai:kotlin-logging-jvm:" + System.getProperty("kotlin_logging_version"))
 
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.2.0")
 
-    implementation("com.google.guava:guava:32.1.1-jre")
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.6")
+    implementation("com.google.guava:guava:32.1.2-jre")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+
+    implementation("org.bitbucket.b_c:jose4j:0.9.3")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+//    testImplementation("org.springframework.security:spring-security-test")
     testImplementation("io.projectreactor:reactor-test")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
