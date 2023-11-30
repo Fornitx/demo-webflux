@@ -2,7 +2,7 @@ package com.example.demowebflux.rest
 
 import com.example.demowebflux.AbstractLoggingTest
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
-import com.example.demowebflux.constants.PATH_V1
+import com.example.demowebflux.constants.PATH
 import com.example.demowebflux.constants.PREFIX
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
@@ -56,7 +56,7 @@ class ClientMockWebServerTest : AbstractLoggingTest() {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    private val validPath = PATH_V1 + "/foo/12"
+    private val validPath = PATH + "/foo/12"
     private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
 
     @Test
@@ -90,7 +90,7 @@ class ClientMockWebServerTest : AbstractLoggingTest() {
         assertEquals("Abc".repeat(6), response.msg)
 
         assertNoMeter(DemoMetrics::error.name)
-        assertMeter(DemoMetrics::httpTimings.name, mapOf(METRICS_TAG_PATH to "$PATH_V1/foo/12"))
+        assertMeter(DemoMetrics::httpTimings.name, mapOf(METRICS_TAG_PATH to "$PATH/foo/12"))
     }
 
     private fun mockWebServer(port: Int, function: suspend () -> Unit) = MockWebServer().use { server ->

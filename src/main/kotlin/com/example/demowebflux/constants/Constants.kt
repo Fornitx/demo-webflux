@@ -2,7 +2,7 @@ package com.example.demowebflux.constants
 
 const val PREFIX = "demo"
 
-const val PATH_V1 = "/v1"
+const val PATH = "/api/v1"
 
 const val HEADER_X_REQUEST_ID = "X-Request-Id"
 

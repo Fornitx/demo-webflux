@@ -2,7 +2,7 @@ package com.example.demowebflux.rest.filter
 
 import com.example.demowebflux.constants.ATTRIBUTE_REQUEST_WAS_LOGGED
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
-import com.example.demowebflux.constants.PATH_V1
+import com.example.demowebflux.constants.PATH
 import com.example.demowebflux.data.DemoErrorResponse
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.errors.DemoRestException
@@ -76,7 +76,7 @@ class GlobalErrorWebExceptionHandler(
     }
 
     override fun renderErrorResponse(request: ServerRequest): Mono<ServerResponse> {
-        if (!request.path().startsWith(PATH_V1)) {
+        if (!request.path().startsWith(PATH)) {
             return super.renderErrorResponse(request)
         }
 
@@ -140,5 +140,6 @@ class GlobalErrorWebExceptionHandler(
     }
 
     override fun logError(request: ServerRequest?, response: ServerResponse?, throwable: Throwable?) {
+        // do nothing
     }
 }

@@ -2,7 +2,7 @@ package com.example.demowebflux.rest
 
 import com.example.demowebflux.AbstractLoggingTest
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
-import com.example.demowebflux.constants.PATH_V1
+import com.example.demowebflux.constants.PATH
 import com.example.demowebflux.constants.PREFIX
 import com.example.demowebflux.data.DemoErrorResponse
 import com.example.demowebflux.data.DemoRequest
@@ -50,7 +50,7 @@ class ClientMockWebServerErrorsTest : AbstractLoggingTest() {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    private val validPath = PATH_V1 + "/foo/12"
+    private val validPath = PATH + "/foo/12"
     private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
 
     fun `500 INTERNAL_SERVER_ERROR`(): List<SocketPolicy> = listOf(

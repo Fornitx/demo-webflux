@@ -2,7 +2,7 @@ package com.example.demowebflux.rest
 
 import com.example.demowebflux.AbstractLoggingTest
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
-import com.example.demowebflux.constants.PATH_V1
+import com.example.demowebflux.constants.PATH
 import com.example.demowebflux.data.DemoErrorResponse
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.errors.DemoError
@@ -42,7 +42,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
     @MockBean
     private lateinit var clientMock: DemoClient
 
-    private val validPath = PATH_V1 + "/foo/12"
+    private val validPath = PATH + "/foo/12"
     private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
 
     @Test

@@ -2,7 +2,7 @@ package com.example.demowebflux.rest
 
 import com.example.demowebflux.constants.CONTEXT_USER_ID
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
-import com.example.demowebflux.constants.PATH_V1
+import com.example.demowebflux.constants.PATH
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
 import com.example.demowebflux.metrics.DemoMetrics
@@ -19,7 +19,7 @@ import kotlin.coroutines.coroutineContext
 private val log = KotlinLogging.logger {}
 
 @RestController
-@RequestMapping(PATH_V1)
+@RequestMapping(PATH)
 class DemoController(private val service: DemoService, private val metrics: DemoMetrics) {
     @PostMapping(
         "/foo/{fooId}",
@@ -33,7 +33,7 @@ class DemoController(private val service: DemoService, private val metrics: Demo
         @RequestBody @Valid request: DemoRequest,
     ): DemoResponse {
         val userId = coroutineContext[ReactorContext]!!.context.get<String>(CONTEXT_USER_ID)
-        return metrics.withHttpTimings(requestId, userId, "$PATH_V1/foo/$fooId") {
+        return metrics.withHttpTimings(requestId, userId, "$PATH/foo/$fooId") {
             service.foo(request)
         }
     }
