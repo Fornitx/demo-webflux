@@ -47,17 +47,20 @@ dependencies {
 
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
 
-    testImplementation("com.squareup.okhttp3:mockwebserver3-junit5:5.0.0-alpha.11")
-    testImplementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.11")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 }
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict", "-Xemit-jvm-type-annotations")
+        freeCompilerArgs += listOf("-Xjsr305=strict", "-Xemit-jvm-type-annotations")
         jvmTarget = "21"
     }
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.jar {
+    enabled = false
 }
