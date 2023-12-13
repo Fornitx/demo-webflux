@@ -32,7 +32,7 @@ dependencies {
 
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.2.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0")
 
     implementation("com.google.guava:guava:32.1.3-jre")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
@@ -45,7 +45,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
 
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 }
