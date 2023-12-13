@@ -28,6 +28,18 @@ management:
     os:
       enabled: true
 #  TODO percentiles
+# management:
+#   endpoints:
+#     web:
+#       exposure:
+#         include: '*'
+#   metrics:
+#     distribution:
+#       percentiles-histogram:
+#         t_demo_my_timer1: true
+#       percentiles:
+#         t_demo_my_timer1: 0.5, 0.9, 0.95
+
 
 spring:
   threads:
