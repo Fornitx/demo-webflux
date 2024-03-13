@@ -32,12 +32,12 @@ dependencies {
 
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.4.0")
 
     implementation("com.google.guava:guava:32.1.3-jre")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 
-    implementation("org.bitbucket.b_c:jose4j:0.9.3")
+    implementation("org.bitbucket.b_c:jose4j:0.9.6")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
