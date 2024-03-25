@@ -60,15 +60,15 @@ class DemoMetrics(private val registry: MeterRegistry) {
         gauge("Cache miss", DemoMetrics::cacheMiss.name) { cache.stats().missCount().toDouble() }
     }
 
-    private final fun counter(description: String, name: String, vararg tags: String): Counter {
+    private fun counter(description: String, name: String, vararg tags: String): Counter {
         return Counter.builder(name(name)).description(description).tags(*tags).register(registry)
     }
 
-    private final fun timer(description: String, name: String, vararg tags: String): Timer {
+    private fun timer(description: String, name: String, vararg tags: String): Timer {
         return Timer.builder(name(name)).description(description).tags(*tags).register(registry)
     }
 
-    private final fun gauge(
+    private fun gauge(
         description: String,
         name: String,
         vararg tags: String,
