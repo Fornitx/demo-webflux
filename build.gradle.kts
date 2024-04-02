@@ -32,7 +32,7 @@ dependencies {
 
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.4.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0")
 
     implementation("com.google.guava:guava:32.1.3-jre")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
@@ -48,6 +48,9 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+
+    // todo awaitility
+    // todo resilence4j
 }
 
 tasks.withType<KotlinCompile> {
