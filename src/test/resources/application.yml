@@ -29,10 +29,6 @@ management:
       enabled: true
 #  TODO percentiles
 # management:
-#   endpoints:
-#     web:
-#       exposure:
-#         include: '*'
 #   metrics:
 #     distribution:
 #       percentiles-histogram:
@@ -40,15 +36,14 @@ management:
 #       percentiles:
 #         t_demo_my_timer1: 0.5, 0.9, 0.95
 
-
 spring:
   threads:
     virtual:
       enabled: true
 
 logging:
-  #  file:
-  #    path: logs
+#  file:
+#    path: logs
   pattern:
     dateformat: HH:mm:ss.SSS
 #  logback:

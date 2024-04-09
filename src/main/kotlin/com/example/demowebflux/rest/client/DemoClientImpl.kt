@@ -15,9 +15,11 @@ import reactor.netty.http.client.HttpClient
 import reactor.netty.transport.logging.AdvancedByteBufFormat
 import java.util.concurrent.TimeUnit
 
-class DemoClientImpl(private val properties: DemoProperties.ClientProperties) : DemoClient {
-    private val client = WebClient.builder()
-        .baseUrl(properties.url)
+class DemoClientImpl(
+    webClientBuilder: WebClient.Builder,
+    private val properties: DemoProperties.ClientProperties
+) : DemoClient {
+    private val client = webClientBuilder.baseUrl(properties.url)
         .clientConnector(
             ReactorClientHttpConnector(
                 HttpClient.create()

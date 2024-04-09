@@ -11,12 +11,13 @@ import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.support.ReloadableResourceBundleMessageSource
+import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 class DemoConfig {
     @Bean
-    fun client(properties: DemoProperties): DemoClient {
-        return DemoClientImpl(properties.client)
+    fun client(webClientBuilder: WebClient.Builder, properties: DemoProperties): DemoClient {
+        return DemoClientImpl(webClientBuilder, properties.client)
     }
 
     @Bean

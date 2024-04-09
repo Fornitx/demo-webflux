@@ -15,6 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.*
+import org.apache.commons.lang3.RandomStringUtils
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
@@ -65,6 +67,45 @@ class ClientMockWebServerErrorsTest : AbstractLoggingTest() {
     @MethodSource
     fun `500 INTERNAL_SERVER_ERROR`(socketPolicy: SocketPolicy) = mockWebServer(
         SERVER_PORT, MockResponse().setSocketPolicy(socketPolicy)
+    ) {
+        val requestId = UUID.randomUUID().toString()
+        val rawResponse = client
+            .post()
+            .uri(validPath)
+            .header(AUTHORIZATION, JwtTestUtils.TOKEN)
+            .header(HEADER_X_REQUEST_ID, requestId)
+            .bodyValue(validBody)
+            .exchange()
+            .expectStatus()
+            .is5xxServerError
+            .expectHeader()
+            .contentType(MediaType.APPLICATION_JSON)
+            .expectHeader()
+            .valueEquals(HEADER_X_REQUEST_ID, requestId)
+            .expectBody<String>()
+            .returnResult()
+            .responseBody
+
+        assertLogger(3)
+
+        log.info { "raw response: $rawResponse" }
+
+        val response = objectMapper.readValue<DemoErrorResponse>(rawResponse!!)
+
+        log.info { "response: $response" }
+
+        assertNoMeter(DemoMetrics::httpTimings.name)
+        assertMeter(
+            DemoMetrics::error.name, mapOf(
+                METRICS_TAG_CODE to DemoError.UNEXPECTED_5XX_ERROR.code.toString(),
+                METRICS_TAG_STATUS to DemoError.UNEXPECTED_5XX_ERROR.httpStatus.toString(),
+            )
+        )
+    }
+
+    @Test
+    fun `500 CODEC_SIZE`() = mockWebServer(
+        SERVER_PORT, MockResponse().setBody(RandomStringUtils.randomAlphanumeric(5 * 1024 * 1024))
     ) {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client
