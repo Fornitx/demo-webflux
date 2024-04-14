@@ -41,6 +41,12 @@ spring:
     virtual:
       enabled: true
 
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
 logging:
 #  file:
 #    path: logs
@@ -53,7 +59,6 @@ logging:
 demo:
   some-prop: 5
   service:
-    cache: true
     multiplier: 3
   client:
     url: PLACEHOLDER
@@ -61,3 +66,4 @@ demo:
     connection-timeout: 3s
     read-timeout: 3s
     write-timeout: 3s
+

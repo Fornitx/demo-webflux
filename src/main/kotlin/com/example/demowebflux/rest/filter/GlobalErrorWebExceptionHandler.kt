@@ -2,7 +2,7 @@ package com.example.demowebflux.rest.filter
 
 import com.example.demowebflux.constants.ATTRIBUTE_REQUEST_WAS_LOGGED
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
-import com.example.demowebflux.constants.PATH
+import com.example.demowebflux.constants.PATH_API
 import com.example.demowebflux.data.DemoErrorResponse
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.errors.DemoRestException
@@ -46,37 +46,8 @@ class GlobalErrorWebExceptionHandler(
         setMessageWriters(configurer.writers)
     }
 
-    private fun getStatusAndDemoError(error: Throwable?): Pair<Int, DemoError> {
-        if (error is DemoRestException) {
-            return error.demoError.toPair()
-        }
-        if (error is ErrorResponse) {
-            if (error.statusCode.is4xxClientError) {
-                return error.statusCode.value() to DemoError.UNEXPECTED_4XX_ERROR
-            } else if (error.statusCode.is5xxServerError) {
-                return error.statusCode.value() to DemoError.UNEXPECTED_5XX_ERROR
-            }
-        }
-        return DemoError.UNEXPECTED_5XX_ERROR.toPair()
-    }
-
-    private fun getErrorAndResponse(request: ServerRequest): Pair<DemoError, DemoErrorResponse> {
-        val error = getError(request)
-        val (httpStatus, demoError) = getStatusAndDemoError(error)
-        val errorResponse = DemoErrorResponse(
-            OffsetDateTime.now(),
-            request.path(),
-            request.headers().firstHeader(HEADER_X_REQUEST_ID),
-            httpStatus,
-            demoError.code,
-            demoError.message,
-            error.message,
-        )
-        return demoError to errorResponse
-    }
-
     override fun renderErrorResponse(request: ServerRequest): Mono<ServerResponse> {
-        if (!request.path().startsWith(PATH)) {
+        if (!request.path().startsWith(PATH_API)) {
             return super.renderErrorResponse(request)
         }
 
@@ -137,6 +108,35 @@ class GlobalErrorWebExceptionHandler(
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(errorAttributes)
         }
+    }
+
+    private fun getStatusAndDemoError(error: Throwable?): Pair<Int, DemoError> {
+        if (error is DemoRestException) {
+            return error.demoError.toPair()
+        }
+        if (error is ErrorResponse) {
+            if (error.statusCode.is4xxClientError) {
+                return error.statusCode.value() to DemoError.UNEXPECTED_4XX_ERROR
+            } else if (error.statusCode.is5xxServerError) {
+                return error.statusCode.value() to DemoError.UNEXPECTED_5XX_ERROR
+            }
+        }
+        return DemoError.UNEXPECTED_5XX_ERROR.toPair()
+    }
+
+    private fun getErrorAndResponse(request: ServerRequest): Pair<DemoError, DemoErrorResponse> {
+        val error = getError(request)
+        val (httpStatus, demoError) = getStatusAndDemoError(error)
+        val errorResponse = DemoErrorResponse(
+            OffsetDateTime.now(),
+            request.path(),
+            request.headers().firstHeader(HEADER_X_REQUEST_ID),
+            httpStatus,
+            demoError.code,
+            demoError.message,
+            error.message,
+        )
+        return demoError to errorResponse
     }
 
     override fun logError(request: ServerRequest?, response: ServerResponse?, throwable: Throwable?) {

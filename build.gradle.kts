@@ -34,8 +34,7 @@ dependencies {
 
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0")
 
-    implementation("com.google.guava:guava:32.1.3-jre")
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    implementation("com.google.guava:guava:33.1.0-jre")
 
     implementation("org.bitbucket.b_c:jose4j:0.9.6")
 
@@ -48,6 +47,8 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.3.1")
 
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+
+    testImplementation("org.wiremock:wiremock-standalone:3.5.2")
 }
 
 tasks.withType<KotlinCompile> {

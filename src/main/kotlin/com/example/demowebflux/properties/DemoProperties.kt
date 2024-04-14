@@ -18,8 +18,6 @@ data class DemoProperties(
     val client: ClientProperties,
 ) {
     data class ServiceProperties(
-        val cache: Boolean,
-
         @field:Min(1)
         val multiplier: Int,
     )

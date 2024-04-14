@@ -1,7 +1,7 @@
 package com.example.demowebflux.rest.filter
 
 import com.example.demowebflux.constants.CONTEXT_USER_ID
-import com.example.demowebflux.constants.PATH
+import com.example.demowebflux.constants.PATH_API
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono
 @Order(3)
 class AuthFilter : WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-        if (!exchange.request.uri.path.startsWith(PATH)) {
+        if (!exchange.request.path.value().startsWith(PATH_API)) {
             return chain.filter(exchange)
         }
 

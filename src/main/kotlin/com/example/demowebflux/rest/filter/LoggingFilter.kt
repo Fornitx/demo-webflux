@@ -2,7 +2,7 @@ package com.example.demowebflux.rest.filter
 
 import com.example.demowebflux.constants.ATTRIBUTE_REQUEST_WAS_LOGGED
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
-import com.example.demowebflux.constants.PATH
+import com.example.demowebflux.constants.PATH_API
 import org.reactivestreams.Publisher
 import org.springframework.core.annotation.Order
 import org.springframework.core.io.buffer.DataBuffer
@@ -25,7 +25,7 @@ import java.nio.channels.Channels
 class LoggingFilter : WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val request = exchange.request
-        if (!request.uri.path.startsWith(PATH)) {
+        if (!request.path.value().startsWith(PATH_API)) {
             return chain.filter(exchange)
         }
         val requestId = request.headers.getFirst(HEADER_X_REQUEST_ID)

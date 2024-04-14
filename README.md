@@ -1,7 +1,12 @@
 TODO list
 * Add
-  * OpenAPI generation
+  * OpenAPI
+    * Global headers
+      * Authorization
+    * OpenApiConfig
   * Awaitility
   * Resilience4j
   * Percentiles
-  * Wiremock
+  * Wiremock ???
+  * Caffeine ???
+  * JWT ???

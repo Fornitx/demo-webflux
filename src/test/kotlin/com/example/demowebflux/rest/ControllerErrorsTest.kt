@@ -2,7 +2,7 @@ package com.example.demowebflux.rest
 
 import com.example.demowebflux.AbstractLoggingTest
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
-import com.example.demowebflux.constants.PATH
+import com.example.demowebflux.constants.PATH_API_V1
 import com.example.demowebflux.data.DemoErrorResponse
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.errors.DemoError
@@ -22,7 +22,6 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import java.util.*
@@ -31,7 +30,6 @@ import kotlin.test.assertEquals
 
 @SpringBootTest
 @AutoConfigureWebTestClient
-@DirtiesContext
 class ControllerErrorsTest : AbstractLoggingTest() {
     @Autowired
     private lateinit var client: WebTestClient
@@ -42,7 +40,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
     @MockBean
     private lateinit var clientMock: DemoClient
 
-    private val validPath = PATH + "/foo/12"
+    private val validPath = "$PATH_API_V1/foo/12?fooNewId=15"
     private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
 
     @Test
@@ -191,7 +189,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
             .uri(validPath)
             .header(AUTHORIZATION, JwtTestUtils.TOKEN)
             .header(HEADER_X_REQUEST_ID, requestId)
-            .bodyValue(validBody.copy(msg = "ab"))
+            .bodyValue(validBody.copy(nullOrNotBlankStr = "ab"))
             .exchange()
             .expectStatus()
             .isBadRequest
@@ -207,19 +205,19 @@ class ControllerErrorsTest : AbstractLoggingTest() {
         assertRawResponse(
             rawResponse,
             DemoError.UNEXPECTED_4XX_ERROR,
-            "Field error in object 'demoRequest' on field 'msg': rejected value [ab]",
-            "size must be between 3 and 256"
+            "Field error in object 'demoRequest' on field 'nullOrNotBlankStr': rejected value [ab]",
+            "size must be between 3 and 2147483647"
         )
     }
 
     @Test
-    fun `400 BadRequest when request tags is empty (custom validator)`() {
+    fun `400 BadRequest when request fails javax validation (custom validator)`() {
         val requestId = UUID.randomUUID().toString()
         val rawResponse = client.post()
             .uri(validPath)
             .header(AUTHORIZATION, JwtTestUtils.TOKEN)
             .header(HEADER_X_REQUEST_ID, requestId)
-            .bodyValue(validBody.copy(tags = setOf()))
+            .bodyValue(validBody.copy(nullOrNotBlankStr = "   "))
             .exchange()
             .expectStatus()
             .isBadRequest
@@ -235,7 +233,35 @@ class ControllerErrorsTest : AbstractLoggingTest() {
         assertRawResponse(
             rawResponse,
             DemoError.UNEXPECTED_4XX_ERROR,
-            "Field error in object 'demoRequest' on field 'tags': rejected value",
+            "Field error in object 'demoRequest' on field 'nullOrNotBlankStr': rejected value [   ]",
+            "Value must be null or not blank"
+        )
+    }
+
+    @Test
+    fun `400 BadRequest when request set is empty (custom validator)`() {
+        val requestId = UUID.randomUUID().toString()
+        val rawResponse = client.post()
+            .uri(validPath)
+            .header(AUTHORIZATION, JwtTestUtils.TOKEN)
+            .header(HEADER_X_REQUEST_ID, requestId)
+            .bodyValue(validBody.copy(nullOrNotEmptySet = setOf()))
+            .exchange()
+            .expectStatus()
+            .isBadRequest
+            .expectHeader()
+            .contentType(MediaType.APPLICATION_JSON)
+            .expectHeader()
+            .valueEquals(HEADER_X_REQUEST_ID, requestId)
+            .expectBody<String>()
+            .returnResult()
+            .responseBody
+
+        assertLogger(2)
+        assertRawResponse(
+            rawResponse,
+            DemoError.UNEXPECTED_4XX_ERROR,
+            "Field error in object 'demoRequest' on field 'nullOrNotEmptySet': rejected value",
             "default message [Value must be null or not empty]"
         )
     }
@@ -247,7 +273,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
             .uri(validPath)
             .header(AUTHORIZATION, JwtTestUtils.TOKEN)
             .header(HEADER_X_REQUEST_ID, requestId)
-            .bodyValue(validBody.copy(msg = "666"))
+            .bodyValue(validBody.copy(nullOrNotBlankStr = "666"))
             .exchange()
             .expectStatus()
             .isEqualTo(HttpStatus.CONFLICT)
@@ -259,7 +285,7 @@ class ControllerErrorsTest : AbstractLoggingTest() {
             .returnResult()
             .responseBody
 
-        assertLogger(3)
+        assertLogger(4)
         assertRawResponse(rawResponse, DemoError.MSG_IS_666, DemoError.MSG_IS_666.message)
     }
 

@@ -1,23 +1,22 @@
 package com.example.demowebflux.rest.client
 
-import com.example.demowebflux.properties.DemoProperties
+import com.example.demowebflux.properties.DemoProperties.ClientProperties
 import io.netty.channel.ChannelOption
-import io.netty.handler.logging.LogLevel
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.handler.timeout.WriteTimeoutHandler
 import org.springframework.http.ResponseEntity
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
-import org.springframework.web.reactive.function.client.ClientResponse
+import org.springframework.http.server.reactive.ServerHttpRequest
+import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitEntity
 import org.springframework.web.reactive.function.client.awaitExchange
 import reactor.netty.http.client.HttpClient
-import reactor.netty.transport.logging.AdvancedByteBufFormat
 import java.util.concurrent.TimeUnit
 
 class DemoClientImpl(
     webClientBuilder: WebClient.Builder,
-    private val properties: DemoProperties.ClientProperties
+    private val properties: ClientProperties
 ) : DemoClient {
     private val client = webClientBuilder.baseUrl(properties.url)
         .clientConnector(
@@ -29,15 +28,24 @@ class DemoClientImpl(
                         conn.addHandler(ReadTimeoutHandler(properties.readTimeout.toMillis(), TimeUnit.MILLISECONDS))
                         conn.addHandler(WriteTimeoutHandler(properties.writeTimeout.toMillis(), TimeUnit.MILLISECONDS))
                     }
-                    .wiretap("reactor.netty.http.client.HttpClient", LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL)
+//                    .wiretap("reactor.netty.http.client.HttpClient", LogLevel.INFO, AdvancedByteBufFormat.TEXTUAL)
             )
         )
         .build()
 
-    override suspend fun call(msg: String): String {
+    override suspend fun foo(msg: String): String {
         return client.post()
             .bodyValue(msg)
-            .awaitExchange<ResponseEntity<String>>(ClientResponse::awaitEntity)
+            .awaitExchange { it.awaitEntity<String>() }
             .body!!
+    }
+
+    override suspend fun proxy(request: ServerHttpRequest): ResponseEntity<String> {
+        return client.method(request.method)
+            .uri { uriBuilder -> uriBuilder.path(request.path.value()).queryParams(request.queryParams).build() }
+            .headers { headers -> headers.addAll(request.headers) }
+            // TODO cookies
+            .body(BodyInserters.fromDataBuffers(request.body))
+            .awaitExchange { it.awaitEntity<String>() }
     }
 }

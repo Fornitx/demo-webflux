@@ -6,9 +6,9 @@ import kotlin.reflect.KClass
 
 @Target(AnnotationTarget.FIELD)
 @MustBeDocumented
-@Constraint(validatedBy = [NullOrNotEmptyValidator::class])
-annotation class NullOrNotEmpty(
-    val message: String = "{jakarta.validation.constraints.NullOrNotEmpty.message}",
+@Constraint(validatedBy = [NullOrNotBlankValidator::class])
+annotation class NullOrNotBlank(
+    val message: String = "{jakarta.validation.constraints.NullOrNotBlank.message}",
     val groups: Array<KClass<*>> = [],
     val payload: Array<KClass<out Payload>> = []
 )
