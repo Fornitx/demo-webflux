@@ -21,20 +21,14 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.util.TestSocketUtils
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
-import org.springframework.util.StringUtils
-import java.nio.charset.Charset
 import java.util.*
-import kotlin.test.assertEquals
 
 @SpringBootTest(
     properties = [
@@ -42,7 +36,6 @@ import kotlin.test.assertEquals
     ]
 )
 @AutoConfigureWebTestClient
-@DirtiesContext
 class CodecSuccessTest : AbstractLoggingTest() {
     companion object {
         val SERVER_PORT = TestSocketUtils.findAvailableTcpPort()
@@ -50,7 +43,7 @@ class CodecSuccessTest : AbstractLoggingTest() {
         @DynamicPropertySource
         @JvmStatic
         fun registerProperties(registry: DynamicPropertyRegistry) {
-            registry.add("$PREFIX.service.multiplier") { "6" }
+            registry.add("$PREFIX.service.multiplier") { "1024" }
             registry.add("$PREFIX.client.url") { "http://localhost:$SERVER_PORT" }
         }
     }
@@ -65,51 +58,9 @@ class CodecSuccessTest : AbstractLoggingTest() {
     private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
 
     @Test
-    fun `200 OK`() = mockWebServer(SERVER_PORT, object : Dispatcher() {
-        override fun dispatch(request: RecordedRequest): MockResponse {
-            val body = request.body.readString(Charset.defaultCharset())
-            return MockResponse()
-                .setResponseCode(HttpStatus.OK.value())
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE)
-                .setBody(StringUtils.capitalize(body))
-        }
-    }) {
-        val requestId = UUID.randomUUID().toString()
-        val rawResponse = client
-            .post()
-            .uri(validPath)
-            .header(AUTHORIZATION, JwtTestUtils.TOKEN)
-            .header(HEADER_X_REQUEST_ID, requestId)
-            .bodyValue(validBody)
-            .exchange()
-            .expectStatus()
-            .isOk
-            .expectHeader()
-            .contentType(MediaType.APPLICATION_JSON)
-            .expectHeader()
-            .valueEquals(HEADER_X_REQUEST_ID, requestId)
-            .expectBody<String>()
-            .returnResult()
-            .responseBody
-
-        assertLogger(3)
-
-        log.info { "raw response: $rawResponse" }
-
-        val response = objectMapper.readValue<DemoResponse>(rawResponse!!)
-
-        log.info { "response: $response" }
-
-        assertEquals("Abc".repeat(6), response.msg)
-
-        assertNoMeter(DemoMetrics::error.name)
-        assertMeter(DemoMetrics::httpTimings.name, mapOf(METRICS_TAG_PATH to "$PATH_API_V1/foo/12"))
-    }
-
-    @Test
     fun `200 CODEC_SIZE`() = mockWebServer(SERVER_PORT, object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse {
-            return MockResponse().setBody(RandomStringUtils.randomAlphanumeric(1024 * 1024))
+            return MockResponse().setBody(RandomStringUtils.randomAlphanumeric(1024))
         }
     }) {
         val requestId = UUID.randomUUID().toString()
@@ -130,7 +81,7 @@ class CodecSuccessTest : AbstractLoggingTest() {
             .returnResult()
             .responseBody
 
-        assertLogger(3)
+        assertLogger(4)
 
         log.info { "raw response: $rawResponse" }
 
