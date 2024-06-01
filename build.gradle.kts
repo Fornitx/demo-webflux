@@ -15,6 +15,8 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+ext["kotlin-coroutines.version"] = System.getProperty("kotlin_coroutines_version")
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -34,7 +36,7 @@ dependencies {
 
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0")
 
-    implementation("com.google.guava:guava:33.1.0-jre")
+    implementation("com.google.guava:guava:33.2.0-jre")
 
     implementation("org.bitbucket.b_c:jose4j:0.9.6")
 

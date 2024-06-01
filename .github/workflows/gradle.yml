@@ -37,7 +37,8 @@ jobs:
           build
           --show-version
           --no-daemon
-          -Dkotlin_version=1.9.23
-          -Dkotlin_logging_version=6.0.4
-          -Dspring_version=3.2.4
-          -Dspring_dm_version=1.1.4
+          -Dkotlin_version=2.0.0
+          -Dkotlin_logging_version=6.0.9
+          -Dspring_version=3.3.0
+          -Dspring_dm_version=1.1.5
+          -Dkotlin_coroutines_version=1.9.0-RC
