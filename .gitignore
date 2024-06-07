@@ -16,6 +16,9 @@ out/
 ### VS Code ###
 .vscode/
 
+### Kotlin ###
+.kotlin
+
 ### Mac OS ###
 .DS_Store
 

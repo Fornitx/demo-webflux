@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     id("org.springframework.boot") version System.getProperty("spring_version")
     id("io.spring.dependency-management") version System.getProperty("spring_dm_version")
@@ -11,8 +9,9 @@ group = "com.example"
 version = "1.0.0-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 ext["kotlin-coroutines.version"] = System.getProperty("kotlin_coroutines_version")
@@ -53,10 +52,9 @@ dependencies {
     testImplementation("org.wiremock:wiremock-standalone:3.5.2")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs += listOf("-Xjsr305=strict", "-Xemit-jvm-type-annotations")
-        jvmTarget = "21"
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict", "-Xemit-jvm-type-annotations")
     }
 }
 

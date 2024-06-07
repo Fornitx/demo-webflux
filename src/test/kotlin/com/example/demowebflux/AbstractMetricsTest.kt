@@ -1,7 +1,12 @@
 package com.example.demowebflux
 
 import com.example.demowebflux.metrics.DemoMetrics
-import io.micrometer.core.instrument.*
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Gauge
+import io.micrometer.core.instrument.Meter
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Tag
+import io.micrometer.core.instrument.Timer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,7 +23,10 @@ abstract class AbstractMetricsTest : AbstractJUnitTest() {
     }
 
     protected fun assertNoMeter(name: String) {
-        val name = DemoMetrics.name(name)
+        assertNoRawMeter(DemoMetrics.name(name))
+    }
+
+    protected fun assertNoRawMeter(name: String) {
         val meters = meterRegistry.find(name).meters()
         assertThat(meters)
             .`as` { "Check meters [${meters.map { it.id }}] is empty for meter '$name'" }
@@ -26,11 +34,18 @@ abstract class AbstractMetricsTest : AbstractJUnitTest() {
     }
 
     protected fun assertMeter(name: String, tags: Map<String, String>, count: Int = 1) {
-        assertMeters(name, mapOf(tags to count))
+        assertRawMeter(DemoMetrics.name(name), tags, count)
+    }
+
+    protected fun assertRawMeter(name: String, tags: Map<String, String>, count: Int = 1) {
+        assertRawMeters(name, mapOf(tags to count))
     }
 
     protected fun assertMeters(name: String, tagsCountMap: Map<Map<String, String>, Int>) {
-        val name = DemoMetrics.name(name)
+        assertRawMeters(DemoMetrics.name(name), tagsCountMap)
+    }
+
+    protected fun assertRawMeters(name: String, tagsCountMap: Map<Map<String, String>, Int>) {
         val meters = meterRegistry.find(name).meters()
         assertThat(meters)
             .`as` { "Check meters [${meters.map { it.id }}] has size ${tagsCountMap.size} for meter '$name'" }
