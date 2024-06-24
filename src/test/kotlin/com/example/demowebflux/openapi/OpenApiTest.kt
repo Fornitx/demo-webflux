@@ -1,22 +1,15 @@
 package com.example.demowebflux.openapi
 
-import com.example.demowebflux.AbstractJUnitTest
+import com.example.demowebflux.AbstractWebTestClientTest
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureWebTestClient
-class OpenApiTest : AbstractJUnitTest() {
-    @Autowired
-    private lateinit var client: WebTestClient
-
+@SpringBootTest
+class OpenApiTest : AbstractWebTestClientTest() {
     @Test
     fun test() {
-        val rawResponse = client.get()
+        val rawResponse = webTestClient.get()
             .uri("/v3/api-docs.yaml")
             .exchange()
             .expectStatus()

@@ -26,6 +26,8 @@ data class DemoProperties(
         @field:NotBlank
         val url: String,
 
+        val enableMetrics: Boolean,
+
         @field:DurationMin(millis = 100)
         @field:DurationMax(seconds = 60)
         val responseTimeout: Duration,

@@ -1,11 +1,12 @@
-package com.example.demowebflux.rest.service
+package com.example.demowebflux.rest
 
+import com.example.demowebflux.constants.API_V2
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.errors.DemoRestException
-import com.example.demowebflux.properties.DemoProperties.ServiceProperties
-import com.example.demowebflux.rest.client.DemoClient
+import com.example.demowebflux.metrics.DemoMetrics
+import com.example.demowebflux.properties.DemoProperties
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.MessageSource
 import org.springframework.context.i18n.LocaleContextHolder
@@ -14,12 +15,13 @@ import org.springframework.http.server.reactive.ServerHttpRequest
 
 private val log = KotlinLogging.logger {}
 
-class DemoServiceImpl(
-    private val properties: ServiceProperties,
+class DemoService(
+    private val properties: DemoProperties.ServiceProperties,
     private val client: DemoClient,
     private val messageSource: MessageSource,
-) : DemoService {
-    override suspend fun foo(request: DemoRequest): ResponseEntity<DemoResponse> {
+    private val metrics: DemoMetrics,
+) {
+    suspend fun foo(request: DemoRequest): ResponseEntity<DemoResponse> {
         log.info {
             messageSource.getMessage(
                 "service.foo",
@@ -41,10 +43,8 @@ class DemoServiceImpl(
         )
     }
 
-    override suspend fun proxy(request: ServerHttpRequest): ResponseEntity<String> {
-        log.info {
-            messageSource.getMessage("service.proxy", emptyArray(), LocaleContextHolder.getLocale())
-        }
-        return client.proxy(request)
+    suspend fun proxy(request: ServerHttpRequest): ResponseEntity<String> {
+        val path = request.path.value().removePrefix(API_V2)
+        return client.proxy(path, request)
     }
 }

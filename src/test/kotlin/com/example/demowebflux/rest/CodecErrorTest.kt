@@ -1,14 +1,14 @@
 package com.example.demowebflux.rest
 
 import com.example.demowebflux.AbstractLoggingTest
+import com.example.demowebflux.constants.API_V1
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
-import com.example.demowebflux.constants.PATH_API_V1
 import com.example.demowebflux.constants.PREFIX
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.metrics.METRICS_TAG_CODE
-import com.example.demowebflux.metrics.METRICS_TAG_STATUS
+import com.example.demowebflux.metrics.METRICS_TAG_HTTP_STATUS
 import com.example.demowebflux.utils.JwtTestUtils
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -52,7 +52,7 @@ class CodecErrorTest : AbstractLoggingTest() {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    private val validPath = "$PATH_API_V1/foo/12?fooNewId=16"
+    private val validPath = "$API_V1/foo/12?fooNewId=16"
     private val validBody = DemoRequest("abc", others = mapOf("a" to "b"))
 
     @Test
@@ -86,11 +86,11 @@ class CodecErrorTest : AbstractLoggingTest() {
 
         log.info { "response: $response" }
 
-        assertNoMeter(DemoMetrics::httpTimings.name)
+        assertNoMeter(DemoMetrics::httpServerRequests.name)
         assertMeter(
             DemoMetrics::error.name, mapOf(
                 METRICS_TAG_CODE to DemoError.UNEXPECTED_5XX_ERROR.code.toString(),
-                METRICS_TAG_STATUS to DemoError.UNEXPECTED_5XX_ERROR.httpStatus.toString()
+                METRICS_TAG_HTTP_STATUS to DemoError.UNEXPECTED_5XX_ERROR.httpStatus.toString()
             )
         )
     }

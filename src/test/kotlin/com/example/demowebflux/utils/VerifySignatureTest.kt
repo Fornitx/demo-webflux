@@ -37,7 +37,7 @@ class VerifySignatureTest {
     }
 
     private fun unbearer(token: String): String {
-        return token.removePrefix(JwtTestUtils.BEARER)
+        return token.removePrefix(JwtUtils.BEARER)
     }
 
     class VerificationKeyResolverImpl(publicKeyBase64: String) : VerificationKeyResolver {

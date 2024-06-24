@@ -3,7 +3,7 @@ package com.example.demowebflux
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer
 import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner
 
-abstract class AbstractContextTest : AbstractJUnitTest() {
+abstract class AbstractContextTest : AbstractTest() {
     protected fun contextRunner(): ReactiveWebApplicationContextRunner {
         return ReactiveWebApplicationContextRunner()
             .withInitializer(ConfigDataApplicationContextInitializer())

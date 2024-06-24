@@ -2,10 +2,6 @@ package com.example.demowebflux.rest
 
 import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.properties.DemoProperties
-import com.example.demowebflux.rest.client.DemoClient
-import com.example.demowebflux.rest.client.DemoClientImpl
-import com.example.demowebflux.rest.service.DemoService
-import com.example.demowebflux.rest.service.DemoServiceImpl
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -15,8 +11,8 @@ import org.springframework.web.reactive.function.client.WebClient
 @Configuration
 class DemoConfig {
     @Bean
-    fun client(webClientBuilder: WebClient.Builder, properties: DemoProperties): DemoClient {
-        return DemoClientImpl(webClientBuilder, properties.client)
+    fun client(webClientBuilder: WebClient.Builder, properties: DemoProperties, metrics: DemoMetrics): DemoClient {
+        return DemoClient(webClientBuilder, properties.client, metrics)
     }
 
     @Bean
@@ -26,7 +22,7 @@ class DemoConfig {
         messageSource: MessageSource,
         metrics: DemoMetrics
     ): DemoService {
-        return DemoServiceImpl(properties.service, client, messageSource)
+        return DemoService(properties.service, client, messageSource, metrics)
     }
 
     @Bean

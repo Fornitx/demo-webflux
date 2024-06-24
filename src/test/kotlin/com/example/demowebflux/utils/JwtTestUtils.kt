@@ -1,5 +1,6 @@
 package com.example.demowebflux.utils
 
+import com.example.demowebflux.utils.JwtUtils.BEARER
 import org.apache.commons.lang3.RandomStringUtils
 import org.jose4j.jws.AlgorithmIdentifiers
 import org.jose4j.jws.JsonWebSignature
@@ -17,8 +18,6 @@ object JwtTestUtils {
         "MEECAQAwEwYHKoZIzj0CAQYIKoZIzj0DAQcEJzAlAgEBBCDLW+8W4WC+6IxZG4X3D9llqDGr7Ls5n3EXU9TcnLsJuA=="
     const val PUBLIC_KEY =
         "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEpRXnkDDoxpKKh31vqV4lD2cfZ4AZPrjaKe+7tocjRdUvK4PRPjKhW7IRXpBkpsgHieJhyN9n5FTkoIJCtoPSQw=="
-
-    const val BEARER = "Bearer "
 
     val TOKEN = BEARER + newClaims {
         setAudience("AUD1", "AUD2")

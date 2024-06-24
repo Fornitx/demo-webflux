@@ -37,6 +37,8 @@ management:
 #         t_demo_my_timer1: 0.5, 0.9, 0.95
 
 spring:
+  codec:
+    max-in-memory-size: 1KB
   threads:
     virtual:
       enabled: true
@@ -62,8 +64,9 @@ demo:
     multiplier: 3
   client:
     url: PLACEHOLDER
-    response-timeout: 3s
-    connection-timeout: 3s
-    read-timeout: 3s
+    enable-metrics: true
+    response-timeout: 2s
+    connection-timeout: 2s
+    read-timeout: 2s
     write-timeout: 3s
 

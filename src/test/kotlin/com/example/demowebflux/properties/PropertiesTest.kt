@@ -11,10 +11,9 @@ import kotlin.test.assertNull
 class PropertiesTest : AbstractContextTest() {
     @Test
     fun allOk() {
-        contextRunner()
-            .run { context ->
-                assertNull(context.startupFailure)
-            }
+        contextRunner().run { context ->
+            assertNull(context.startupFailure)
+        }
     }
 
     @Test

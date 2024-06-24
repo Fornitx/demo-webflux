@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
-abstract class AbstractMetricsTest : AbstractJUnitTest() {
+abstract class AbstractMetricsTest : AbstractTest() {
     @Autowired
     protected lateinit var meterRegistry: MeterRegistry
 
