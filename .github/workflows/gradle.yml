@@ -33,4 +33,6 @@ jobs:
     - uses: gradle/actions/setup-gradle@v3
       with:
         gradle-version: current
-        run: gradle build --show-version --no-daemon -Dkotlin_version=2.0.0 -Dkotlin_logging_version=7.0.0 -Dspring_version=3.3.1 -Dspring_dm_version=1.1.5 -Dkotlin_coroutines_version=1.9.0-RC
+      
+    - name: Gradle build
+      run: gradle build --show-version --no-daemon -Dkotlin_version=2.0.0 -Dkotlin_logging_version=7.0.0 -Dspring_version=3.3.1 -Dspring_dm_version=1.1.5 -Dkotlin_coroutines_version=1.9.0-RC
