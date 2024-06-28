@@ -11,6 +11,7 @@ import io.github.oshai.kotlinlogging.withLoggingContext
 import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.handler.timeout.WriteTimeoutHandler
+import kotlinx.coroutines.slf4j.MDCContext
 import org.springframework.http.ResponseEntity
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.http.server.reactive.ServerHttpRequest
@@ -25,6 +26,7 @@ import reactor.netty.channel.MicrometerChannelMetricsRecorder
 import reactor.netty.http.client.HttpClient
 import java.util.concurrent.TimeUnit
 import java.util.function.Supplier
+import kotlin.coroutines.coroutineContext
 
 private val log = KotlinLogging.logger {}
 
@@ -72,6 +74,7 @@ class DemoClient(
     }
 
     suspend fun proxyInternal(oaht: String, request: ServerHttpRequest): ResponseEntity<String> {
+        val requestId = coroutineContext[MDCContext.Key]!!.contextMap!![LOGSTASH_REQUEST_ID]!!
         return webClient.method(request.method)
             .uri { uriBuilder ->
                 uriBuilder.path(oaht)
@@ -81,6 +84,7 @@ class DemoClient(
             .headers { headers -> headers.addAll(request.headers) }
             // TODO cookies
             .body(BodyInserters.fromDataBuffers(request.body))
+            .context { ctx -> ctx.put(ATTRIBUTE_REQUEST_ID, requestId) }
             .awaitExchange { it.awaitEntity<String>() }
     }
 

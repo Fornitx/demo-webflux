@@ -20,9 +20,8 @@ class DemoConfig {
         properties: DemoProperties,
         client: DemoClient,
         messageSource: MessageSource,
-        metrics: DemoMetrics
     ): DemoService {
-        return DemoService(properties.service, client, messageSource, metrics)
+        return DemoService(properties.service, client, messageSource)
     }
 
     @Bean

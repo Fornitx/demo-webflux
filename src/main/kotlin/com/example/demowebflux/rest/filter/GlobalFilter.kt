@@ -2,7 +2,6 @@ package com.example.demowebflux.rest.filter
 
 import com.example.demowebflux.constants.API
 import com.example.demowebflux.constants.ATTRIBUTE_DEMO_TOKEN
-import com.example.demowebflux.constants.ATTRIBUTE_REQUEST_ID
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
 import com.example.demowebflux.logging.ServerHttpLogger
 import com.example.demowebflux.metrics.DemoMetrics
@@ -19,17 +18,17 @@ import org.springframework.http.server.reactive.ServerHttpRequestDecorator
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator
 import org.springframework.stereotype.Component
+import org.springframework.web.server.CoWebFilter
+import org.springframework.web.server.CoWebFilterChain
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.ServerWebExchangeDecorator
-import org.springframework.web.server.WebFilter
-import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.nio.charset.Charset
 
 @Component
-class GlobalFilter(private val metrics: DemoMetrics) : WebFilter {
-    override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+class GlobalFilter(private val metrics: DemoMetrics) : CoWebFilter() {
+    override suspend fun filter(exchange: ServerWebExchange, chain: CoWebFilterChain) {
         val request = exchange.request
         if (!request.path.value().startsWith(API)) {
             return chain.filter(exchange)
@@ -63,11 +62,6 @@ class GlobalFilter(private val metrics: DemoMetrics) : WebFilter {
         // request metrics
         metrics.httpServerRequests(request.method, request.uri.path).increment()
 
-        // TODO messageSource
-//        log.info {
-//            messageSource.getMessage("service.proxy", emptyArray(), LocaleContextHolder.getLocale())
-//        }
-
         if (requestId == null) {
             throw BadRequestException("Required header '$HEADER_X_REQUEST_ID' is missing")
         }
@@ -93,7 +87,7 @@ class GlobalFilter(private val metrics: DemoMetrics) : WebFilter {
 
         return chain.filter(if (ServerHttpLogger.log.isDebugEnabled()) LoggingWebExchange(exchange) else exchange)
             // save requestId in Reactor context to reach it in ExchangeFilterFunction
-            .contextWrite { ctx -> ctx.put(ATTRIBUTE_REQUEST_ID, requestId) }
+//            .contextWrite { ctx -> ctx.put(ATTRIBUTE_REQUEST_ID, requestId) }
     }
 
     class LoggingWebExchange(delegate: ServerWebExchange) : ServerWebExchangeDecorator(delegate) {

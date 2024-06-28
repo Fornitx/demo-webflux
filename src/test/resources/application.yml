@@ -27,6 +27,8 @@ management:
       enabled: true
     os:
       enabled: true
+    process:
+      enabled: true
 #  TODO percentiles
 # management:
 #   metrics:
