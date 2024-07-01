@@ -2,12 +2,10 @@ package com.example.demowebflux.rest
 
 import com.example.demowebflux.constants.API
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
-import com.example.demowebflux.constants.LOGSTASH_REQUEST_ID
 import com.example.demowebflux.constants.V1
 import com.example.demowebflux.constants.V2
 import com.example.demowebflux.data.DemoRequest
 import com.example.demowebflux.data.DemoResponse
-import io.github.oshai.kotlinlogging.coroutines.withLoggingContextAsync
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -45,22 +43,11 @@ class DemoController(private val service: DemoService) {
         @RequestParam fooNewId: String,
         @RequestHeader(HEADER_X_REQUEST_ID) requestId: String,
         @RequestBody @Valid request: DemoRequest,
-    ): ResponseEntity<DemoResponse> {
-        return withLoggingContextAsync(LOGSTASH_REQUEST_ID to requestId) {
-            service.foo(request)
-        }
-    }
+    ): ResponseEntity<DemoResponse> = service.foo(request)
 
     @RequestMapping("$V2/**")
     suspend fun call(
         @RequestHeader(HEADER_X_REQUEST_ID) requestId: String,
         request: ServerHttpRequest,
-    ): ResponseEntity<String> {
-//        val context = coroutineContext[ReactorContext]!!.context
-//        val requestId = context.get<String>(CONTEXT_REQUEST_ID)
-//        val userId = context.get<String>(CONTEXT_USER_ID)
-        return withLoggingContextAsync(LOGSTASH_REQUEST_ID to requestId) {
-            service.proxy(request)
-        }
-    }
+    ): ResponseEntity<String> = service.proxy(request)
 }

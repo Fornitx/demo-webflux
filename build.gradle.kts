@@ -33,9 +33,9 @@ dependencies {
 
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0")
 
-    implementation("com.google.guava:guava:33.2.0-jre")
+    implementation("com.google.guava:guava:33.2.1-jre")
 
     implementation("org.bitbucket.b_c:jose4j:0.9.6")
 

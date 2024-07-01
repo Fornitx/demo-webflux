@@ -3,12 +3,14 @@ package com.example.demowebflux.rest.filter
 import com.example.demowebflux.constants.API
 import com.example.demowebflux.constants.ATTRIBUTE_DEMO_TOKEN
 import com.example.demowebflux.constants.HEADER_X_REQUEST_ID
+import com.example.demowebflux.constants.LOGSTASH_REQUEST_ID
 import com.example.demowebflux.logging.ServerHttpLogger
 import com.example.demowebflux.metrics.DemoMetrics
 import com.example.demowebflux.rest.exceptions.BadRequestException
 import com.example.demowebflux.rest.exceptions.ForbiddenException
 import com.example.demowebflux.rest.exceptions.UnauthorizedException
 import com.example.demowebflux.utils.JwtUtils
+import io.github.oshai.kotlinlogging.coroutines.withLoggingContextAsync
 import io.micrometer.core.instrument.Timer
 import org.reactivestreams.Publisher
 import org.springframework.core.io.buffer.DataBuffer
@@ -85,9 +87,9 @@ class GlobalFilter(private val metrics: DemoMetrics) : CoWebFilter() {
             throw ForbiddenException("Audience not found")
         }
 
-        return chain.filter(if (ServerHttpLogger.log.isDebugEnabled()) LoggingWebExchange(exchange) else exchange)
-            // save requestId in Reactor context to reach it in ExchangeFilterFunction
-//            .contextWrite { ctx -> ctx.put(ATTRIBUTE_REQUEST_ID, requestId) }
+        return withLoggingContextAsync(LOGSTASH_REQUEST_ID to requestId) {
+            chain.filter(if (ServerHttpLogger.log.isDebugEnabled()) LoggingWebExchange(exchange) else exchange)
+        }
     }
 
     class LoggingWebExchange(delegate: ServerWebExchange) : ServerWebExchangeDecorator(delegate) {
@@ -116,14 +118,12 @@ class GlobalFilter(private val metrics: DemoMetrics) : CoWebFilter() {
     ) : ServerHttpResponseDecorator(exchange.response) {
         override fun writeWith(dataBuffers: Publisher<out DataBuffer>): Mono<Void> = Mono.defer {
             val body = StringBuilder()
-            super.writeWith(
-                Flux.from(dataBuffers)
-                    .doOnNext { dataBuffer ->
-                        body.append(dataBuffer.toString(Charset.defaultCharset()))
-                    }.doOnComplete {
-                        ServerHttpLogger.logResponseBody(exchange, body.toString())
-                    }
-            )
+            Flux.from(dataBuffers)
+                .doOnNext { dataBuffer ->
+                    body.append(dataBuffer.toString(Charset.defaultCharset()))
+                }.doOnComplete {
+                    ServerHttpLogger.logResponseBody(exchange, body.toString())
+                }.`as` { super.writeWith(it) }
         }
     }
 }

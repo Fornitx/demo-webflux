@@ -11,17 +11,20 @@ import io.github.oshai.kotlinlogging.withLoggingContext
 import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.handler.timeout.WriteTimeoutHandler
+import kotlinx.coroutines.reactor.ReactorContext
 import kotlinx.coroutines.slf4j.MDCContext
 import org.springframework.http.ResponseEntity
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.web.reactive.function.BodyInserters
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction
+import org.springframework.web.reactive.function.client.ClientRequest
+import org.springframework.web.reactive.function.client.ClientResponse
+import org.springframework.web.reactive.function.client.CoExchangeFilterFunction
+import org.springframework.web.reactive.function.client.CoExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitEntity
 import org.springframework.web.reactive.function.client.awaitExchange
 import org.springframework.web.util.UriComponentsBuilder
-import reactor.core.publisher.Mono
 import reactor.netty.channel.MicrometerChannelMetricsRecorder
 import reactor.netty.http.client.HttpClient
 import java.util.concurrent.TimeUnit
@@ -84,21 +87,28 @@ class DemoClient(
             .headers { headers -> headers.addAll(request.headers) }
             // TODO cookies
             .body(BodyInserters.fromDataBuffers(request.body))
+            // https://github.com/spring-projects/spring-framework/issues/32148
             .context { ctx -> ctx.put(ATTRIBUTE_REQUEST_ID, requestId) }
             .awaitExchange { it.awaitEntity<String>() }
     }
 
-    private fun logRequest(): ExchangeFilterFunction = ExchangeFilterFunction.ofRequestProcessor { request ->
-        ClientHttpLogger.logRequest(request)
-        Mono.just(request)
+    private fun logRequest(): CoExchangeFilterFunction = object : CoExchangeFilterFunction() {
+        override suspend fun filter(request: ClientRequest, next: CoExchangeFunction): ClientResponse {
+            ClientHttpLogger.logRequest(request)
+            return next.exchange(request)
+        }
     }
 
-    private fun logResponse(): ExchangeFilterFunction = ExchangeFilterFunction.ofResponseProcessor { response ->
-        Mono.deferContextual { ctx ->
-            withLoggingContext(LOGSTASH_REQUEST_ID to ctx.get(ATTRIBUTE_REQUEST_ID)) {
+    private fun logResponse(): CoExchangeFilterFunction = object : CoExchangeFilterFunction() {
+        override suspend fun filter(request: ClientRequest, next: CoExchangeFunction): ClientResponse {
+            val response = next.exchange(request)
+            // https://github.com/spring-projects/spring-framework/issues/32148
+            withLoggingContext(
+                LOGSTASH_REQUEST_ID to coroutineContext[ReactorContext]!!.context[ATTRIBUTE_REQUEST_ID]
+            ) {
                 ClientHttpLogger.logResponse(response)
             }
-            Mono.just(response)
+            return response
         }
     }
 }
