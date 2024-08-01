@@ -44,12 +44,16 @@ dependencies {
 
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-debug")
 
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
 
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 
-    testImplementation("org.wiremock:wiremock-standalone:3.5.2")
+//    testImplementation("org.wiremock:wiremock-standalone:3.5.2")
+
+    testImplementation("io.projectreactor.tools:blockhound:1.0.9.RELEASE")
+    testImplementation("io.projectreactor.tools:blockhound-junit-platform:1.0.9.RELEASE")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -61,6 +65,7 @@ kotlin {
 }
 
 tasks.withType<Test> {
+    jvmArgs("-XX:+AllowRedefinitionToAddDeleteMethods")
     useJUnitPlatform()
 }
 
