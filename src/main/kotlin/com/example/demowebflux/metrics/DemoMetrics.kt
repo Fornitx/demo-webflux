@@ -107,7 +107,7 @@ class DemoMetrics(private val registry: MeterRegistry) {
     companion object {
         private val nameCache = ConcurrentHashMap<String, String>()
 
-        private fun name(name: String): String = nameCache.computeIfAbsent(name) {
+        fun name(name: String): String = nameCache.computeIfAbsent(name) {
             PREFIX + "_" + name
         }
     }
