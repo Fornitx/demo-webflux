@@ -4,8 +4,6 @@ import com.example.demowebflux.constants.PREFIX
 import com.example.demowebflux.errors.DemoError
 import com.example.demowebflux.rest.exceptions.WebClientConnectException
 import com.example.demowebflux.rest.exceptions.WebClientTimeoutException
-import com.google.common.base.CaseFormat.LOWER_CAMEL
-import com.google.common.base.CaseFormat.LOWER_UNDERSCORE
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
@@ -110,7 +108,7 @@ class DemoMetrics(private val registry: MeterRegistry) {
         private val nameCache = ConcurrentHashMap<String, String>()
 
         private fun name(name: String): String = nameCache.computeIfAbsent(name) {
-            PREFIX + "_" + LOWER_CAMEL.to(LOWER_UNDERSCORE, name)
+            PREFIX + "_" + name
         }
     }
 }
