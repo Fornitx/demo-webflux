@@ -10,7 +10,7 @@ import com.example.demowebflux.rest.exceptions.BadRequestException
 import com.example.demowebflux.rest.exceptions.ForbiddenException
 import com.example.demowebflux.rest.exceptions.UnauthorizedException
 import com.example.demowebflux.utils.JwtUtils
-import io.github.oshai.kotlinlogging.coroutines.withLoggingContextAsync
+import com.example.demowebflux.utils.withMDCContextAsync
 import io.micrometer.core.instrument.Timer
 import org.reactivestreams.Publisher
 import org.springframework.core.io.buffer.DataBuffer
@@ -87,7 +87,7 @@ class GlobalFilter(private val metrics: DemoMetrics) : CoWebFilter() {
             throw ForbiddenException("Audience not found")
         }
 
-        return withLoggingContextAsync(LOGSTASH_REQUEST_ID to requestId) {
+        return withMDCContextAsync(LOGSTASH_REQUEST_ID to requestId) {
             chain.filter(if (ServerHttpLogger.log.isDebugEnabled()) LoggingWebExchange(exchange) else exchange)
         }
     }

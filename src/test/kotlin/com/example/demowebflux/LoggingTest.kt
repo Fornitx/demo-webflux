@@ -1,7 +1,7 @@
 package com.example.demowebflux
 
+import com.example.demowebflux.utils.withMDCContextAsync
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.github.oshai.kotlinlogging.coroutines.withLoggingContextAsync
 import io.github.oshai.kotlinlogging.withLoggingContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.slf4j.MDCContext
@@ -50,7 +50,7 @@ class LoggingTest {
     fun `3_testGlobalScope_correct`() {
         val job = GlobalScope.launch {
             log.info { "xxx-first" }
-            withLoggingContextAsync("logKey" to "logValue") {
+            withMDCContextAsync("logKey" to "logValue") {
                 log.info { "xxx-1" }
                 withContext(Dispatchers.IO + MDCContext()) {
                     log.info { "xxx-2" }
