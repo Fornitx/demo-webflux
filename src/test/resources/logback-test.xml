@@ -10,6 +10,9 @@
 <!--            <level>${FILE_LOG_THRESHOLD}</level>-->
 <!--        </filter>-->
 <!--        <encoder class="net.logstash.logback.encoder.LogstashEncoder">-->
+<!--            <mdcEntryWriter class="net.logstash.logback.composite.loggingevent.mdc.LongMdcEntryWriter"/>-->
+<!--            <mdcEntryWriter class="net.logstash.logback.composite.loggingevent.mdc.DoubleMdcEntryWriter"/>-->
+<!--            <mdcEntryWriter class="net.logstash.logback.composite.loggingevent.mdc.BooleanMdcEntryWriter"/>-->
 <!--            <customFields>{"appname":"demo"}</customFields>-->
 <!--            <version>1.0.0-SNAPSHOT</version>-->
 <!--        </encoder>-->
