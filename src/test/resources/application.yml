@@ -41,6 +41,9 @@ management:
 spring:
   codec:
     max-in-memory-size: 1KB
+  output:
+    ansi:
+      enabled: always
   threads:
     virtual:
       enabled: true
@@ -51,11 +54,9 @@ springdoc:
   swagger-ui:
     enabled: true
 
-logging:
+#logging:
 #  file:
 #    path: logs
-  pattern:
-    dateformat: HH:mm:ss.SSS
 #  logback:
 #    rollingpolicy:
 #      clean-history-on-start: true
